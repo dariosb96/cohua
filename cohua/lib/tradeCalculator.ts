@@ -5,11 +5,12 @@ export function calculateTradeMetrics(
  size:number
 ){
 
- const risk = Math.abs(entry - stop)
+ const risk = Math.abs(entry - stop) * size
 
- const pnl = exit
-  ? (exit - entry) * size
-  : null
+ const pnl =
+  exit !== null
+   ? (exit - entry) * size
+   : null
 
  const result =
   pnl === null
