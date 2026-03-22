@@ -2,37 +2,39 @@ import  prisma from "@/lib/prisma"
 
 
 
+import { Trade } from "@prisma/client"
+
 export async function getStats() {
 
- const trades = await prisma.trade.findMany()
+  const trades: Trade[] = await prisma.trade.findMany()
 
- const totalTrades = trades.length
+  const totalTrades = trades.length
 
- const wins = trades.filter(t => t.result === "WIN").length
- const losses = trades.filter(t => t.result === "LOSS").length
- const breakeven = trades.filter(t => t.result === "BE").length
+  const wins = trades.filter((t: Trade) => t.result === "WIN").length
+  const losses = trades.filter((t: Trade) => t.result === "LOSS").length
+  const breakeven = trades.filter((t: Trade) => t.result === "BE").length
 
- const totalPnl = trades.reduce<number>(
-  (sum, t) => sum + (t.pnl ?? 0),
-  0
- )
+  const totalPnl = trades.reduce(
+    (sum: number, t: Trade) => sum + (t.pnl ?? 0),
+    0
+  )
 
- const totalRisk = trades.reduce<number>(
-  (sum, t) => sum + (t.risk ?? 0),
-  0
- )
+  const totalRisk = trades.reduce(
+    (sum: number, t: Trade) => sum + (t.risk ?? 0),
+    0
+  )
 
- return {
-  totalTrades,
-  wins,
-  losses,
-  breakeven,
-  winrate: totalTrades
-   ? (wins / totalTrades) * 100
-   : 0,
-  totalPnl,
-  avgRisk: totalTrades
-   ? totalRisk / totalTrades
-   : 0
- }
+  return {
+    totalTrades,
+    wins,
+    losses,
+    breakeven,
+    winrate: totalTrades
+      ? (wins / totalTrades) * 100
+      : 0,
+    totalPnl,
+    avgRisk: totalTrades
+      ? totalRisk / totalTrades
+      : 0
+  }
 }
