@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma"
+import prisma from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
 export async function GET() {
@@ -34,16 +34,16 @@ export async function GET() {
    ? 0
    : grossProfit / grossLoss
 
- const rrValues = trades
+
+
+const rrValues = trades
   .map(t => t.rr)
-  .filter(Boolean)
+  .filter((rr): rr is number => rr !== null)  // type guard en lugar de Boolean
 
- const averageRR =
+const averageRR =
   rrValues.length
-   ? rrValues.reduce((a, b) => a + b, 0) /
-     rrValues.length
-   : 0
-
+    ? rrValues.reduce((a, b) => a + b, 0) / rrValues.length
+    : 0
  let cumulative = 0
 
  const equityCurve = trades.map(trade => {
