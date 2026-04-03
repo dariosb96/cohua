@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -15,47 +14,77 @@ model User {
   phone     String?  @unique
   password  String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   accounts  Account[]
+  setups    Setup[]
 }
 
 model Account {
   id        String   @id @default(uuid())
   name      String
-  balance   Float
+  balance   Decimal
   createdAt DateTime @default(now())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id])
-  trades    Trade[]
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  trades Trade[]
+
+  @@index([userId])
 }
 
 model Trade {
   id           String   @id @default(uuid())
   symbol       String
   side         Side
-  entry        Float
-  exit         Float?
-  stopLoss     Float
-  takeProfit   Float?
-  size         Float
-  risk         Float?
-  reward       Float?
-  rr           Float?
-  pnl          Float?
+
+  entry        Decimal
+  exit         Decimal?
+
+  stopLoss     Decimal
+  takeProfit   Decimal?
+
+  size         Decimal
+
+  risk         Decimal?
+  reward       Decimal?
+  rr           Decimal?
+
+  pnl          Decimal?
+  fee          Decimal?
+  balanceAfter Decimal?
+
+  status       TradeStatus @default(OPEN)
   result       Result?
+
   createdAt    DateTime @default(now())
-  accountId    String
-  account      Account  @relation(fields: [accountId], references: [id])
-  setupId      String?
-  setup        Setup?   @relation(fields: [setupId], references: [id])
-  tags         TradeTag[]
+  updatedAt    DateTime @updatedAt
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  setupId String?
+  setup   Setup? @relation(fields: [setupId], references: [id], onDelete: SetNull)
+
+  tags TradeTag[]
+
+  @@index([accountId, createdAt])
 }
 
 model Setup {
   id          String   @id @default(uuid())
   name        String
   description String?
-  trades      Trade[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  trades Trade[]
 }
 
 model Tag {
@@ -67,8 +96,9 @@ model Tag {
 model TradeTag {
   tradeId String
   tagId   String
-  trade   Trade @relation(fields: [tradeId], references: [id])
-  tag     Tag   @relation(fields: [tagId], references: [id])
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([tradeId, tagId])
 }
@@ -82,4 +112,10 @@ enum Result {
   WIN
   LOSS
   BE
+}
+
+enum TradeStatus {
+  OPEN
+  CLOSED
+  CANCELLED
 }

@@ -1,5 +1,5 @@
 // app/api/users/[id]/route.ts
-import { userService } from "@/services/accountService"
+import { userService } from "@/services/userService"
 import { NextResponse } from "next/server"
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
