@@ -1,3 +1,51 @@
-[00:00:00.703] Server  LOG     ✓ Ready in 547ms
-[00:08:49.880] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:08:50.255] Browser WARN    Image with src "http://localhost:3000/vercel.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:00:01.898] Server  LOG     ✓ Ready in 1354ms
+[00:03:22.162] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:24.722] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:24.806] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:24.888] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.000] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.077] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.165] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.310] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.403] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.471] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.537] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.627] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.730] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.817] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.896] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:25.952] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:26.434] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:26.504] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:26.578] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:26.636] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:26.698] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:26.860] Browser ERROR   uncaughtError: TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:26.928] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:03:26.994] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:08:29.872] Server  LOG     ✓ Compiled in 58ms
+[00:08:30.091] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:08:30.487] Browser ERROR   uncaughtError: TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:09:11.063] Server  LOG       Reload env: .env
+[00:12:11.456] Server  LOG     ✓ Compiled in 31ms
+[00:14:43.671] Server  LOG     ✓ Compiled in 831ms
+[00:16:14.323] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:16:14.563] Browser WARN    Image with src "http://localhost:3000/vercel.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:17:48.812] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:18:49.549] Server  LOG     ✓ Compiled in 336ms
+[00:19:00.521] Server  ERROR   ⨯ TypeError: {imported module ./lib/auth.ts}.auth is not a function
+[00:21:59.593] Browser ERROR   ./app/login/page.tsx:1:1
+Export auth doesn't exist in target module
+> 1 | import { auth } from "@/lib/auth"
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 | import { redirect } from "next/navigation"
+  3 |
+  4 | export default async function LoginPage() {
+
+The export auth was not found in module [project]/lib/auth.ts [app-rsc] (ecmascript).
+Did you mean to import authOptions?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+[00:22:28.425] Server  LOG     ✓ Compiled in 39ms
+[01:31:43.974] Server  WARN    [next-auth][warn][NEXTAUTH_URL] "\nhttps://next-auth.js.org/warnings#nextauth_url"
+[01:34:22.900] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:34:23.107] Browser WARN    Image with src "http://localhost:3000/vercel.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.

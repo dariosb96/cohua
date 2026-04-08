@@ -14,15 +14,15 @@ export async function getStats() {
   const losses = trades.filter((t: Trade) => t.result === "LOSS").length
   const breakeven = trades.filter((t: Trade) => t.result === "BE").length
 
-  const totalPnl = trades.reduce(
-    (sum: number, t: Trade) => sum + (t.pnl ?? 0),
-    0
-  )
+const totalPnl = trades.reduce(
+  (sum: number, t) => sum + Number(t.pnl ?? 0),
+  0
+)
 
-  const totalRisk = trades.reduce(
-    (sum: number, t: Trade) => sum + (t.risk ?? 0),
-    0
-  )
+const totalRisk = trades.reduce(
+  (sum: number, t) => sum + Number(t.risk ?? 0),
+  0
+)
 
   return {
     totalTrades,

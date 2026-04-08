@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { auth } from "@/lib/auth"
 
 type CreateUserDTO = {
   name: string
@@ -17,7 +18,16 @@ type UpdateUserDTO = {
 
 export const userService = {
 
+  // 🔥 REGISTRO
   async create(data: CreateUserDTO) {
+    const existing = await prisma.user.findUnique({
+      where: { email: data.email }
+    })
+
+    if (existing) {
+      throw new Error("Email already in use")
+    }
+
     const hashedPassword = await bcrypt.hash(data.password, 10)
 
     return prisma.user.create({
@@ -38,7 +48,27 @@ export const userService = {
   },
 
   async getAll() {
+    const session = await auth()
+    if (!session) throw new Error("Unauthorized")
+
     return prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        createdAt: true
+      }
+    })
+  },
+
+
+  async getMe() {
+    const session = await auth()
+    if (!session) throw new Error("Unauthorized")
+
+    return prisma.user.findUnique({
+      where: { id: session.user.id },
       select: {
         id: true,
         name: true,
@@ -58,7 +88,12 @@ export const userService = {
   },
 
   async getById(id: string) {
-    if (!id) throw new Error("ID requerido")
+    const session = await auth()
+    if (!session) throw new Error("Unauthorized")
+
+    if (session.user.id !== id) {
+      throw new Error("Forbidden")
+    }
 
     return prisma.user.findUnique({
       where: { id },
@@ -81,7 +116,12 @@ export const userService = {
   },
 
   async update(id: string, data: UpdateUserDTO) {
-    if (!id) throw new Error("ID requerido")
+    const session = await auth()
+    if (!session) throw new Error("Unauthorized")
+
+    if (session.user.id !== id) {
+      throw new Error("Forbidden")
+    }
 
     const updateData: UpdateUserDTO = { ...data }
 
@@ -101,9 +141,13 @@ export const userService = {
       }
     })
   },
-
   async delete(id: string) {
-    if (!id) throw new Error("ID requerido")
+    const session = await auth()
+    if (!session) throw new Error("Unauthorized")
+
+    if (session.user.id !== id) {
+      throw new Error("Forbidden")
+    }
 
     return prisma.user.delete({
       where: { id }
