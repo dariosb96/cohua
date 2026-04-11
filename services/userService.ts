@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
-import { auth } from "@/lib/auth"
+import { authOptions } from "@/lib/auth"
+import { getServerSession } from "next-auth"
 
 type CreateUserDTO = {
   name: string
@@ -48,9 +49,8 @@ export const userService = {
   },
 
   async getAll() {
-    const session = await auth()
-    if (!session) throw new Error("Unauthorized")
-
+    
+   
     return prisma.user.findMany({
       select: {
         id: true,
@@ -64,7 +64,7 @@ export const userService = {
 
 
   async getMe() {
-    const session = await auth()
+    const session = await getServerSession(authOptions) 
     if (!session) throw new Error("Unauthorized")
 
     return prisma.user.findUnique({
@@ -88,7 +88,7 @@ export const userService = {
   },
 
   async getById(id: string) {
-    const session = await auth()
+    const session = await getServerSession(authOptions) 
     if (!session) throw new Error("Unauthorized")
 
     if (session.user.id !== id) {
@@ -116,7 +116,7 @@ export const userService = {
   },
 
   async update(id: string, data: UpdateUserDTO) {
-    const session = await auth()
+    const session = await getServerSession(authOptions) 
     if (!session) throw new Error("Unauthorized")
 
     if (session.user.id !== id) {
@@ -142,7 +142,7 @@ export const userService = {
     })
   },
   async delete(id: string) {
-    const session = await auth()
+    const session = await getServerSession(authOptions) 
     if (!session) throw new Error("Unauthorized")
 
     if (session.user.id !== id) {

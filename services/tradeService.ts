@@ -1,10 +1,11 @@
 import prisma from "@/lib/prisma"
 import { calculateTradeMetrics } from "@/lib/tradeCalculator"
+import { authOptions } from "@/lib/auth"
+import { getServerSession } from "next-auth"
 
-import { auth } from "@/lib/auth"
 
 export async function createTrade(data: any) {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
 
   if (!session) {
     throw new Error("Unauthorized")
@@ -29,7 +30,7 @@ return prisma.trade.create({
 }
 
 export async function getTrades() {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session) throw new Error("Unauthorized")
 
   return prisma.trade.findMany({
@@ -46,7 +47,7 @@ export async function getTrades() {
   })
 }
 export async function getTrade(id: string) {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session) throw new Error("Unauthorized")
 
   return prisma.trade.findFirst({
@@ -64,7 +65,7 @@ export async function getTrade(id: string) {
 }
 
 export async function updateTrade(id: string, data: any) {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session) throw new Error("Unauthorized")
 
  const existing = await prisma.trade.findFirst({
@@ -104,7 +105,7 @@ export async function updateTrade(id: string, data: any) {
 }
 
 export async function deleteTrade(id: string) {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session) throw new Error("Unauthorized")
 
   const existing = await prisma.trade.findFirst({

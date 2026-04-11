@@ -12,9 +12,11 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  
   try {
     const body = await req.json()
     const { name, email, password, phone } = body
+    console.log("POST /api/users", body)
 
     if (!name || !email || !password) {
       return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 })
@@ -26,6 +28,10 @@ export async function POST(req: Request) {
     if (error.code === "P2002") {
       return NextResponse.json({ error: "Email o teléfono ya registrado" }, { status: 409 })
     }
+    console.error(error)
+
     return NextResponse.json({ error: "Error al crear usuario" }, { status: 500 })
+
+
   }
 }

@@ -7,10 +7,13 @@ export default async function proxy(req: NextRequest) {
     secret: process.env.AUTH_SECRET
   })
 
-  const isAuthRoute = req.nextUrl.pathname.startsWith("/api/auth")
+  const pathname = req.nextUrl.pathname
+
+  const isAuthRoute = pathname.startsWith("/api/auth")
   const isPublicRoute =
-    req.nextUrl.pathname === "/login" ||
-    req.nextUrl.pathname === "/register"
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname.startsWith("/api/user")
 
   if (isAuthRoute || isPublicRoute) {
     return NextResponse.next()
