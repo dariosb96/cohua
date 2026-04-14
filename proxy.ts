@@ -25,6 +25,10 @@ export default async function proxy(req: NextRequest) {
 
   return NextResponse.next()
 }
+// VERSION ! FUNCIONANDO
+// export const config = {
+//   matcher: ["/dashboard/:path*", "/api/:path*"]
+// }
 
 export const config = {
   matcher: ["/dashboard/:path*", "/api/:path*"]
