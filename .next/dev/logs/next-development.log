@@ -1,18 +1,7 @@
-[00:00:02.580] Server  LOG     ✓ Ready in 1959ms
-[00:00:15.311] Server  WARN    [next-auth][warn][NEXTAUTH_URL] "\nhttps://next-auth.js.org/warnings#nextauth_url"
-[00:00:16.037] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:51.970] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:01:21.438] Server  WARN    [next-auth][warn][NEXTAUTH_URL] "\nhttps://next-auth.js.org/warnings#nextauth_url"
-[00:05:40.862] Server  LOG     ✓ Compiled in 59ms
-[00:05:41.700] Server  ERROR   ⨯ Error: The default export is not a React Component in "/login/page"
-[00:05:42.297] Server  ERROR   ⨯ Error: The default export is not a React Component in "/login/page"
-[00:05:43.351] Server  ERROR   ⨯ Error: The default export is not a React Component in "/login/page"
-[00:05:43.864] Server  ERROR   ⨯ Error: The default export is not a React Component in "/login/page"
-[00:05:44.276] Browser ERROR   uncaughtError: Error: The default export is not a React Component in "/login/page"
-[00:05:45.574] Server  LOG     ✓ Compiled in 299ms
-[00:11:55.238] Server  LOG     ✓ Compiled in 204ms
-[00:14:26.446] Server  WARN    [next-auth][warn][NEXTAUTH_URL] "\nhttps://next-auth.js.org/warnings#nextauth_url"
-[00:14:26.956] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[01:28:20.215] Server  WARN    [next-auth][warn][NEXTAUTH_URL] "\nhttps://next-auth.js.org/warnings#nextauth_url"
-[01:28:45.183] Server  LOG     ✓ Compiled in 35ms
-[01:29:19.089] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:03.370] Server  LOG     ✓ Ready in 2.7s
+[00:01:24.486] Server  LOG     POST /api/users {}
+[00:01:25.456] Server  LOG     prisma:query "SELECT \"public\".\"User\".\"id\", \"public\".\"User\".\"name\", \"public\".\"User\".\"email\", \"public\".\"User\".\"phone\", \"public\".\"User\".\"password\", \"public\".\"User\".\"createdAt\", \"public\".\"User\".\"updatedAt\" FROM \"public\".\"User\" WHERE (\"public\".\"User\".\"email\" = $1 AND 1=1) LIMIT $2 OFFSET $3"
+[00:01:25.836] Server  LOG     prisma:query "INSERT INTO \"public\".\"User\" (\"id\",\"name\",\"email\",\"phone\",\"password\",\"createdAt\",\"updatedAt\") VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING \"public\".\"User\".\"id\", \"public\".\"User\".\"name\", \"public\".\"User\".\"email\", \"public\".\"User\".\"phone\", \"public\".\"User\".\"createdAt\""
+[00:01:30.518] Server  LOG     ○ Compiling /login ...
+[00:01:32.997] Server  WARN    [next-auth][warn][NEXTAUTH_URL] "\nhttps://next-auth.js.org/warnings#nextauth_url"
+[00:13:21.281] Server  LOG       Reload env: .env

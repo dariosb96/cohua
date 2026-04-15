@@ -103,7 +103,7 @@ async function proxy(req) {
     });
     const pathname = req.nextUrl.pathname;
     const isAuthRoute = pathname.startsWith("/api/auth");
-    const isPublicRoute = pathname === "/login" || pathname === "/register" || pathname.startsWith("/api/user");
+    const isPublicRoute = pathname === "/login" || pathname === "/register" || pathname.startsWith("/api/users");
     if (isAuthRoute || isPublicRoute) {
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$middleware$5d$__$28$ecmascript$29$__["NextResponse"].next();
     }

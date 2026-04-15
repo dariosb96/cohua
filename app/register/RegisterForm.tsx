@@ -92,12 +92,12 @@ export default function RegisterForm() {
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-xl shadow-md w-96 space-y-4"
       >
-        <h1 className="text-xl font-bold text-center">Crear cuenta</h1>
+        <h1 className="text-xl font-bold text-black text-center">Crear cuenta</h1>
 
         <input
           name="name"
           placeholder="Nombre"
-          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none"
+          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none text-gray-800"
           onChange={handleChange}
         />
 
@@ -105,7 +105,7 @@ export default function RegisterForm() {
           name="email"
           type="email"
           placeholder="Correo"
-          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none"
+          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none text-gray-800"
           onChange={handleChange}
         />
 
@@ -113,14 +113,14 @@ export default function RegisterForm() {
           name="password"
           type="password"
           placeholder="Contraseña"
-          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none"
+          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none text-gray-800"
           onChange={handleChange}
         />
 
         <input
           name="phone"
           placeholder="Teléfono (opcional)"
-          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none"
+          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none text-gray-800"
           onChange={handleChange}
         />
 

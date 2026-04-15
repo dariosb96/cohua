@@ -35,7 +35,7 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
+    <div className="flex items-center justify-center h-screen bg-gray-100 text-blue-700">
       <form
         onSubmit={handleLogin}
         className="bg-white p-6 rounded-xl shadow-md w-80 space-y-4"
@@ -45,7 +45,7 @@ export default function LoginForm() {
         <input
           type="email"
           placeholder="Correo"
-          className="w-full border p-2 rounded outline-none focus:ring-2 focus:ring-black"
+          className="w-full border p-2 rounded outline-none focus:ring-2 focus:ring-black text-gray-800"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -54,7 +54,7 @@ export default function LoginForm() {
         <input
           type="password"
           placeholder="Contraseña"
-          className="w-full border p-2 rounded outline-none focus:ring-2 focus:ring-black"
+          className="w-full border p-2 rounded outline-none focus:ring-2 focus:ring-black text-gray-800"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required

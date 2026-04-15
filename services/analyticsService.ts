@@ -15,7 +15,7 @@ export async function getEquityCurve() {
 
  const curve = trades.map((trade: typeof trades[number]) => {
 
-  equity += trade.pnl ?? 0
+equity += Number(trade.pnl ?? 0)
 
   return {
    date: trade.createdAt,
@@ -57,8 +57,7 @@ export async function getSetupAnalytics() {
    setups[name].wins++
   }
 
-  setups[name].pnl += trade.pnl ?? 0
-
+ setups[name].pnl += Number(trade.pnl ?? 0)
  })
 
  return Object.entries(setups).map(([name, data]) => ({

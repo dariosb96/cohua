@@ -41,7 +41,7 @@ function LoginForm() {
         router.push("/dashboard");
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "flex items-center justify-center h-screen bg-gray-100",
+        className: "flex items-center justify-center h-screen bg-gray-100 text-blue-700",
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
             onSubmit: handleLogin,
             className: "bg-white p-6 rounded-xl shadow-md w-80 space-y-4",
@@ -57,7 +57,7 @@ function LoginForm() {
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                     type: "email",
                     placeholder: "Correo",
-                    className: "w-full border p-2 rounded outline-none focus:ring-2 focus:ring-black",
+                    className: "w-full border p-2 rounded outline-none focus:ring-2 focus:ring-black text-gray-800",
                     value: email,
                     onChange: (e)=>setEmail(e.target.value),
                     required: true
@@ -69,7 +69,7 @@ function LoginForm() {
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                     type: "password",
                     placeholder: "Contraseña",
-                    className: "w-full border p-2 rounded outline-none focus:ring-2 focus:ring-black",
+                    className: "w-full border p-2 rounded outline-none focus:ring-2 focus:ring-black text-gray-800",
                     value: password,
                     onChange: (e)=>setPassword(e.target.value),
                     required: true

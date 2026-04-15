@@ -4,10 +4,12 @@ import { getTrade, updateTrade, deleteTrade } from "@/services/tradeService"
 // GET -> obtener uno
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const trade = await getTrade(params.id)
+    const { id } = await params
+
+    const trade = await getTrade(id)
 
     if (!trade) {
       return NextResponse.json(
@@ -24,16 +26,16 @@ export async function GET(
     )
   }
 }
-
 // PUT -> actualizar completo
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const data = await req.json()
 
-    const updatedTrade = await updateTrade(params.id, data)
+    const updatedTrade = await updateTrade(id, data)
 
     return NextResponse.json(updatedTrade)
   } catch (error: any) {
@@ -54,12 +56,13 @@ export async function PUT(
 // PATCH -> actualización parcial
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const data = await req.json()
 
-    const updatedTrade = await updateTrade(params.id, data)
+    const updatedTrade = await updateTrade(id, data)
 
     return NextResponse.json(updatedTrade)
   } catch (error: any) {
@@ -76,14 +79,15 @@ export async function PATCH(
     )
   }
 }
-
 // DELETE -> eliminar
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await deleteTrade(params.id)
+    const { id } = await params
+
+    await deleteTrade(id)
 
     return NextResponse.json({
       message: "Trade deleted successfully"

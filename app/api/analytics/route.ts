@@ -12,8 +12,10 @@ export async function GET() {
 
  const winRate = total ? wins / total : 0
 
- const pnl = trades.reduce((acc, t) => acc + (t.pnl || 0), 0)
-
+const pnl = trades.reduce(
+  (acc, t) => acc + Number(t.pnl ?? 0),
+  0
+)
  return NextResponse.json({
   total,
   wins,

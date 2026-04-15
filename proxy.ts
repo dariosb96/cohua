@@ -13,7 +13,7 @@ export default async function proxy(req: NextRequest) {
   const isPublicRoute =
     pathname === "/login" ||
     pathname === "/register" ||
-    pathname.startsWith("/api/user")
+    pathname.startsWith("/api/users")
 
   if (isAuthRoute || isPublicRoute) {
     return NextResponse.next()
