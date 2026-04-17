@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
-import { authOptions } from "@/lib/auth"
+import { authOptions } from "@/lib/authOptions"
 import { getServerSession } from "next-auth"
 
 type CreateUserDTO = {

@@ -136,8 +136,8 @@ export default function RegisterForm() {
           {loading ? "Creando cuenta..." : "Registrarse"}
         </button>
 
-        <p className="text-sm text-center">
-          ¿Ya tienes cuenta?{" "}
+        <p className="text-sm text-center text-gray-700">
+          ¿Notienes cuenta?{" "}
           <span
             className="text-blue-600 cursor-pointer"
             onClick={() => router.push("/login")}

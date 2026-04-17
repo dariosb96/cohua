@@ -71,7 +71,15 @@ export default function LoginForm() {
         >
           {loading ? "Entrando..." : "Entrar"}
         </button>
+
+          <span
+            className="text-blue-600 cursor-pointer text-center"
+            onClick={() => router.push("/register")}
+          >
+            registrarse
+          </span>
+
       </form>
     </div>
   )
-}
+}  

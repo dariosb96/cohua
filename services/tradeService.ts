@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma"
 import { calculateTradeMetrics } from "@/lib/tradeCalculator"
-import { authOptions } from "@/lib/auth"
+import { authOptions } from "@/lib/authOptions"
 import { getServerSession } from "next-auth"
 
 
