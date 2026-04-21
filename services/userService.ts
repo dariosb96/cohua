@@ -63,29 +63,32 @@ export const userService = {
   },
 
 
-  async getMe() {
-    const session = await getServerSession(authOptions) 
-    if (!session) throw new Error("Unauthorized")
+ async getMe() {
+  const session = await getServerSession(authOptions)
 
-    return prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        createdAt: true,
-        accounts: {
-          select: {
-            id: true,
-            name: true,
-            balance: true,
-            createdAt: true
-          }
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized")
+  }
+
+  return prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      createdAt: true,
+      accounts: {
+        select: {
+          id: true,
+          name: true,
+          balance: true,
+          createdAt: true
         }
       }
-    })
-  },
+    }
+  })
+},
 
   async getById(id: string) {
     const session = await getServerSession(authOptions) 

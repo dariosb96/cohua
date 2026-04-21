@@ -1,67 +1,132 @@
 import prisma from "@/lib/prisma"
-import bcrypt from "bcryptjs"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/authOptions"
 
-// SE NECESITA REPARAR ESTE CODIGO!!!!!
+type CreateAccountDTO = {
+  name: string
+  balance: number
+}
 
-export const userService = {
-  async create(data: {
-    name: string
-    email: string
-    password: string
-    phone?: string
-  }) {
-    const hashedPassword = await bcrypt.hash(data.password, 10)
+type UpdateAccountDTO = {
+  name?: string
+  balance?: number
+}
 
-    return prisma.user.create({
+export const accountService = {
+  // ✅ CREATE
+  async create(data: CreateAccountDTO) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    return prisma.account.create({
       data: {
         name: data.name,
-        email: data.email,
-        phone: data.phone,
-        password: hashedPassword
+        balance: data.balance,
+        userId: session.user.id
+      },
+      select: {
+        id: true,
+        name: true,
+        balance: true,
+        createdAt: true
       }
     })
   },
 
+  // ✅ GET ALL (solo del usuario)
   async getAll() {
-    return prisma.user.findMany({
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    return prisma.account.findMany({
+      where: {
+        userId: session.user.id
+      },
+      orderBy: {
+        createdAt: "desc"
+      },
       select: {
         id: true,
         name: true,
-        email: true,
-        phone: true,
-        createdAt: true,
-        accounts: true
+        balance: true,
+        createdAt: true
       }
     })
   },
 
+  // ✅ GET ONE
   async getById(id: string) {
-    return prisma.user.findUnique({
-      where: { id },
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    const account = await prisma.account.findFirst({
+      where: {
+        id,
+        userId: session.user.id
+      },
       select: {
         id: true,
         name: true,
-        email: true,
-        phone: true,
+        balance: true,
         createdAt: true,
-        accounts: true
+        trades: {
+          select: {
+            id: true,
+            symbol: true,
+            pnl: true,
+            createdAt: true
+          }
+        }
+      }
+    })
+
+    if (!account) throw new Error("Not found")
+
+    return account
+  },
+
+  // ✅ UPDATE
+  async update(id: string, data: UpdateAccountDTO) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    // 🔥 validación de ownership
+    const account = await prisma.account.findFirst({
+      where: {
+        id,
+        userId: session.user.id
+      }
+    })
+
+    if (!account) throw new Error("Forbidden")
+
+    return prisma.account.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        name: true,
+        balance: true,
+        updatedAt: true
       }
     })
   },
 
-  async update(id: string, data: any) {
-    if (data.password) {
-      data.password = await bcrypt.hash(data.password, 10)
-    }
-
-    return prisma.user.update({
-      where: { id },
-      data
-    })
-  },
-
+  // ✅ DELETE
   async delete(id: string) {
-    return prisma.user.delete({
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    const account = await prisma.account.findFirst({
+      where: {
+        id,
+        userId: session.user.id
+      }
+    })
+
+    if (!account) throw new Error("Forbidden")
+
+    return prisma.account.delete({
       where: { id }
     })
   }
