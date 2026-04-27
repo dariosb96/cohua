@@ -16,7 +16,10 @@ export const accountService = {
   // ✅ CREATE
   async create(data: CreateAccountDTO) {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized")
+    }
 
     return prisma.account.create({
       data: {
@@ -33,10 +36,13 @@ export const accountService = {
     })
   },
 
-  // ✅ GET ALL (solo del usuario)
+  // ✅ GET ALL
   async getAll() {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized")
+    }
 
     return prisma.account.findMany({
       where: {
@@ -57,7 +63,10 @@ export const accountService = {
   // ✅ GET ONE
   async getById(id: string) {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized")
+    }
 
     const account = await prisma.account.findFirst({
       where: {
@@ -80,7 +89,9 @@ export const accountService = {
       }
     })
 
-    if (!account) throw new Error("Not found")
+    if (!account) {
+      throw new Error("Not found")
+    }
 
     return account
   },
@@ -88,9 +99,11 @@ export const accountService = {
   // ✅ UPDATE
   async update(id: string, data: UpdateAccountDTO) {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) throw new Error("Unauthorized")
 
-    // 🔥 validación de ownership
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized")
+    }
+
     const account = await prisma.account.findFirst({
       where: {
         id,
@@ -98,7 +111,9 @@ export const accountService = {
       }
     })
 
-    if (!account) throw new Error("Forbidden")
+    if (!account) {
+      throw new Error("Forbidden")
+    }
 
     return prisma.account.update({
       where: { id },
@@ -115,7 +130,10 @@ export const accountService = {
   // ✅ DELETE
   async delete(id: string) {
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) throw new Error("Unauthorized")
+
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized")
+    }
 
     const account = await prisma.account.findFirst({
       where: {
@@ -124,7 +142,9 @@ export const accountService = {
       }
     })
 
-    if (!account) throw new Error("Forbidden")
+    if (!account) {
+      throw new Error("Forbidden")
+    }
 
     return prisma.account.delete({
       where: { id }
