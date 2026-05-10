@@ -7,23 +7,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================================================
+// USER & ACCOUNT MANAGEMENT
+// ============================================================================
+
 model User {
   id        String   @id @default(uuid())
   name      String
   email     String   @unique
   phone     String?  @unique
   password  String
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  accounts  Account[]
-  setups    Setup[]
+  accounts Account[]
+  setups   Setup[]
+  tags     Tag[]
+  alertRules AlertRule[]
+  tradePlans TradePlan[]
+
+  @@index([email])
 }
 
 model Account {
   id        String   @id @default(uuid())
   name      String
-  balance   Decimal
+
+  balance   Decimal  @db.Decimal(28, 8)
+  balanceHigh Decimal? @db.Decimal(28, 8)
+  balanceLow  Decimal? @db.Decimal(28, 8)
+
+  exchange  Exchange?
+  apiKey    String?
+  apiSecret String?
+  isActive  Boolean  @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -31,36 +50,140 @@ model Account {
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   trades Trade[]
+  allocations PositionAllocation[]
 
   @@index([userId])
+  @@index([exchange])
 }
 
+// ============================================================================
+// SETUPS & ORDER BLOCKS
+// ============================================================================
+
+model Setup {
+  id String @id @default(uuid())
+
+  name        String
+  description String?
+
+  obType      OBType?
+  season      Season?
+
+  htf         Timeframe?
+  mtf         Timeframe?
+  ltf         Timeframe?
+
+  emaTouchRequired Boolean @default(true)
+  emaConfigHtf String?
+  emaConfigMtf String?
+  emaConfigLtf String?
+
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  trades Trade[]
+  backTests BackTest[]
+  confluenceRecords EMAConfluence[]
+
+  @@index([userId])
+  @@index([obType])
+  @@unique([userId, name])
+}
+
+model OrderBlock {
+  id String @id @default(uuid())
+
+  symbol   String
+  timeframe Timeframe?
+
+  highPrice   Decimal @db.Decimal(28, 8)
+  lowPrice    Decimal @db.Decimal(28, 8)
+  midPrice    Decimal @db.Decimal(28, 8)
+
+  obType      OBType
+
+  isBroken    Boolean @default(false)
+  brokenAt    DateTime?
+
+  isClaimed   Boolean @default(false)
+  claimedAt   DateTime?
+
+  liquidityZones String?
+
+  trendAtOB   TrendBias?
+  volumeAtOB  Decimal? @db.Decimal(28, 8)
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+
+  trades Trade[]
+
+  @@index([symbol, timeframe])
+  @@index([isBroken])
+  @@index([isClaimed])
+}
+
+// ============================================================================
+// TRADE CORE
+// ============================================================================
+
 model Trade {
-  id           String   @id @default(uuid())
-  symbol       String
-  side         Side
+  id String @id @default(uuid())
 
-  entry        Decimal
-  exit         Decimal?
+  symbol String
 
-  stopLoss     Decimal
-  takeProfit   Decimal?
+  side Side
 
-  size         Decimal
+  leverage Int?
 
-  risk         Decimal?
-  reward       Decimal?
-  rr           Decimal?
+  status TradeStatus @default(OPEN)
 
-  pnl          Decimal?
-  fee          Decimal?
-  balanceAfter Decimal?
+  result Result?
 
-  status       TradeStatus @default(OPEN)
-  result       Result?
+  conviction Conviction?
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  entryPrice    Decimal @db.Decimal(28, 8)
+  exitPrice     Decimal? @db.Decimal(28, 8)
+
+  stopLoss      Decimal? @db.Decimal(28, 8)
+  takeProfit    Decimal? @db.Decimal(28, 8)
+
+  tp1Price      Decimal? @db.Decimal(28, 8)
+  tp2Price      Decimal? @db.Decimal(28, 8)
+  actualExitPrice Decimal? @db.Decimal(28, 8)
+
+  size Decimal @db.Decimal(28, 8)
+
+  riskAmount Decimal? @db.Decimal(28, 8)
+
+  pnl Decimal? @db.Decimal(28, 8)
+  pnlPercent Decimal? @db.Decimal(10, 4)
+
+  fee Decimal? @db.Decimal(28, 8)
+
+  rr Decimal? @db.Decimal(10, 2)
+
+  balanceBefore Decimal? @db.Decimal(28, 8)
+  balanceAfter  Decimal? @db.Decimal(28, 8)
+
+  followedPlan Boolean @default(true)
+  mistake      Boolean @default(false)
+  mistakeType  String?
+
+  emotion Emotion?
+
+  notes String?
+
+  imageUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  closedAt  DateTime?
 
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
@@ -68,15 +191,151 @@ model Trade {
   setupId String?
   setup   Setup? @relation(fields: [setupId], references: [id], onDelete: SetNull)
 
+  obId String?
+  ob   OrderBlock? @relation(fields: [obId], references: [id], onDelete: SetNull)
+
+  context TradeContext?
+  marketSnapshot MarketSnapshot?
+  executions TradeExecution[]
   tags TradeTag[]
+  confluences EMAConfluence[]
+  allocation PositionAllocation?
 
   @@index([accountId, createdAt])
+  @@index([symbol])
+  @@index([status])
+  @@index([result])
+  @@index([obId])
+  @@index([tp1Price])
+  @@index([tp2Price])
 }
 
-model Setup {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
+// ============================================================================
+// EXECUTION & CONTEXT
+// ============================================================================
+
+model TradeExecution {
+  id String @id @default(uuid())
+
+  type ExecutionType
+
+  price Decimal @db.Decimal(28, 8)
+
+  size Decimal @db.Decimal(28, 8)
+
+  fee Decimal? @db.Decimal(28, 8)
+
+  note String?
+
+  createdAt DateTime @default(now())
+
+  tradeId String
+  trade   Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  @@index([tradeId])
+}
+
+model TradeContext {
+  id String @id @default(uuid())
+
+  timeframe String?
+
+  htfTrend TrendBias?
+  mtfTrend TrendBias?
+  ltfTrend TrendBias?
+
+  liquiditySweep Boolean @default(false)
+  sweepConfirmed Boolean @default(false)
+
+  reclaim Boolean @default(false)
+
+  displacement Boolean @default(false)
+
+  choch Boolean @default(false)
+
+  bos Boolean @default(false)
+
+  ema15mTouch Boolean @default(false)
+  ema1hTouch Boolean @default(false)
+  emaConfluenceAtEntry Boolean @default(false)
+  emaConfluenceAtExit Boolean @default(false)
+  emaConfluencePrice Decimal? @db.Decimal(28, 8)
+
+  obTouched Boolean @default(false)
+  obType OBType?
+  obLevel String?
+
+  session Session?
+
+  followedSetup Boolean @default(true)
+
+  notes String?
+
+  tradeId String @unique
+  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+}
+
+model EMAConfluence {
+  id String @id @default(uuid())
+
+  setupId String?
+  setup   Setup? @relation(fields: [setupId], references: [id], onDelete: SetNull)
+
+  ema15mPrice Decimal @db.Decimal(28, 8)
+  ema1hPrice  Decimal @db.Decimal(28, 8)
+  ema4hPrice  Decimal? @db.Decimal(28, 8)
+
+  isAligned   Boolean @default(false)
+  alignmentGap Decimal? @db.Decimal(10, 4)
+
+  tradingPhase ConfluencePhase
+
+  priceAtConfluence Decimal @db.Decimal(28, 8)
+
+  detectedAt DateTime @default(now())
+
+  tradeId String
+  trade   Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  @@index([tradeId])
+  @@index([isAligned])
+  @@index([tradingPhase])
+}
+
+// ============================================================================
+// MARKET DATA
+// ============================================================================
+
+model MarketSnapshot {
+  id String @id @default(uuid())
+
+  volume Decimal? @db.Decimal(28, 8)
+  volatility Decimal? @db.Decimal(10, 2)
+  percentMove Decimal? @db.Decimal(10, 2)
+
+  fundingRate Decimal? @db.Decimal(10, 4)
+  openInterest Decimal? @db.Decimal(28, 8)
+
+  btcTrend TrendBias?
+  ethTrend TrendBias?
+
+  createdAt DateTime @default(now())
+
+  tradeId String @unique
+  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+}
+
+model AlertRule {
+  id String @id @default(uuid())
+
+  name String
+
+  symbol String
+  alertType AlertType
+
+  condition String
+
+  isActive Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -84,13 +343,111 @@ model Setup {
   userId String
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  trades Trade[]
+  @@index([userId, symbol])
 }
 
+// ============================================================================
+// BACKTESTING & ANALYTICS
+// ============================================================================
+
+model BackTest {
+  id String @id @default(uuid())
+
+  setupId String
+  setup   Setup @relation(fields: [setupId], references: [id], onDelete: Cascade)
+
+  symbol    String
+  startDate DateTime
+  endDate   DateTime
+
+  totalTrades    Int
+  winTrades      Int
+  lossTrades     Int
+  beaTrades      Int
+
+  winRate        Decimal @db.Decimal(5, 2)
+  avgWin         Decimal @db.Decimal(10, 2)
+  avgLoss        Decimal @db.Decimal(10, 2)
+  profitFactor   Decimal @db.Decimal(10, 2)
+
+  maxDrawdown    Decimal @db.Decimal(10, 2)
+  returnOnRisk   Decimal @db.Decimal(10, 2)
+
+  sweepOccurrence Decimal @db.Decimal(5, 2)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+
+  @@index([setupId, symbol])
+}
+
+// ============================================================================
+// POSITION SIZING & MONEY MANAGEMENT
+// ============================================================================
+
+model PositionAllocation {
+  id String @id @default(uuid())
+
+  tradeId String @unique
+  trade   Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  riskDollars    Decimal @db.Decimal(28, 8)
+  riskPercent    Decimal @db.Decimal(5, 2)
+
+  rewardDollars  Decimal @db.Decimal(28, 8)
+  rewardPercent  Decimal @db.Decimal(5, 2)
+
+  rrRatio        Decimal @db.Decimal(5, 2)
+
+  createdAt DateTime @default(now())
+
+  @@index([accountId])
+}
+
+model TradePlan {
+  id String @id @default(uuid())
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  month      String
+
+  maxTrades  Int
+  tradesUsed Int @default(0)
+
+  targetReturn Decimal @db.Decimal(10, 2)
+  actualReturn Decimal? @db.Decimal(10, 2)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, month])
+}
+
+// ============================================================================
+// TAGS & ORGANIZATION
+// ============================================================================
+
 model Tag {
-  id     String     @id @default(uuid())
-  name   String     @unique
+  id String @id @default(uuid())
+
+  name String
+  color String?
+
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   trades TradeTag[]
+
+  @@unique([userId, name])
 }
 
 model TradeTag {
@@ -102,6 +459,10 @@ model TradeTag {
 
   @@id([tradeId, tagId])
 }
+
+// ============================================================================
+// ENUMS
+// ============================================================================
 
 enum Side {
   LONG
@@ -118,4 +479,84 @@ enum TradeStatus {
   OPEN
   CLOSED
   CANCELLED
+}
+
+enum TrendBias {
+  BULLISH
+  BEARISH
+  RANGE
+}
+
+enum OBType {
+  BULLISH
+  BEARISH
+}
+
+enum Session {
+  ASIA
+  LONDON
+  NEW_YORK
+}
+
+enum Emotion {
+  CALM
+  CONFIDENT
+  FEAR
+  FOMO
+  REVENGE
+}
+
+enum ExecutionType {
+  ENTRY
+  PARTIAL
+  EXIT
+  STOP
+  TP1
+  TP2
+  SWEEP
+}
+
+enum Exchange {
+  BINANCE
+  BYBIT
+  OKX
+  BITGET
+  KUCOIN
+  MEXC
+}
+
+enum Conviction {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Timeframe {
+  M5
+  M15
+  H1
+  H4
+  D1
+}
+
+enum Season {
+  EXPANSION
+  RECLAIM
+  DISPLACEMENT
+  RETRACEMENT
+}
+
+enum AlertType {
+  EMA_CONVERGENCE
+  OB_TOUCH
+  PRICE_LEVEL
+  VOLATILITY
+  SWEEP_CONFIRMATION
+}
+
+enum ConfluencePhase {
+  ENTRY
+  FIRST_TP
+  SWEEP_SETUP
+  SECOND_TP
 }
