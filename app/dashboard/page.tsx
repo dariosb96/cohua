@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/authOptions"
 import { redirect } from "next/navigation"
 import LogoutButton from "./logOutButton"
 import { accountService } from "@/services/accountService"
- import { Prisma } from "@prisma/client"
+import { Decimal } from "@prisma/client/runtime/library"
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
@@ -12,15 +12,16 @@ export default async function DashboardPage() {
     redirect("/login")
   }
 
-  // 🔥 SOLUCIÓN: directo al service (NO fetch)
-  const accounts = await accountService.getAll()
+  if (!session.user?.id) {
+    redirect("/login")
+  }
 
-  // 💰 cálculo simple
+  const accounts = await accountService.getAll(session.user.id)
 
-const totalBalance = accounts.reduce(
-  (acc, accItem) => acc.add(accItem.balance),
-  new Prisma.Decimal(0)
-)
+  const totalBalance = accounts.reduce(
+    (acc: number, accItem: any) => acc + parseFloat(accItem.balance.toString()),
+    0
+  )
 
   return (
     <div className="p-6 space-y-6">
@@ -41,7 +42,10 @@ const totalBalance = accounts.reduce(
       <div className="bg-black text-white p-6 rounded-xl shadow">
         <h2 className="text-lg">Balance total</h2>
         <p className="text-3xl font-bold">
-          ${totalBalance.toLocaleString()}
+          ${totalBalance.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}
         </p>
       </div>
 
@@ -53,7 +57,7 @@ const totalBalance = accounts.reduce(
           <p className="text-gray-500">No tienes cuentas aún</p>
         )}
 
-        {accounts.map((acc) => (
+        {accounts.map((acc: any) => (
           <div
             key={acc.id}
             className="bg-white shadow rounded p-4 flex justify-between"
@@ -66,7 +70,10 @@ const totalBalance = accounts.reduce(
             </div>
 
             <p className="font-bold">
-              ${acc.balance.toLocaleString()}
+              ${parseFloat(acc.balance.toString()).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })}
             </p>
           </div>
         ))}

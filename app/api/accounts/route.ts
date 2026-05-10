@@ -44,9 +44,8 @@ export async function POST(req: NextRequest) {
       name,
       balance,
       exchange,
-      accountType,
-      riskPerTrade,
-      baseCurrency
+      apiKey,
+      apiSecret
     } = body
 
     // VALIDACIONES
@@ -64,24 +63,22 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Validar exchange si se proporciona
+    const validExchanges = ["BINANCE", "BYBIT", "OKX", "BITGET", "KUCOIN", "MEXC"]
+    if (exchange && !validExchanges.includes(exchange)) {
+      return NextResponse.json(
+        { error: "Exchange no válido" },
+        { status: 400 }
+      )
+    }
+
     const account = await accountService.create({
       userId: session.user.id,
-
       name: name.trim(),
-
       balance: Number(balance),
-
-      initialBalance: Number(balance),
-
-      exchange,
-
-      accountType,
-
-      riskPerTrade: riskPerTrade
-        ? Number(riskPerTrade)
-        : null,
-
-      baseCurrency: baseCurrency || "USDT"
+      exchange: exchange || undefined,
+      apiKey: apiKey || undefined,
+      apiSecret: apiSecret || undefined
     })
 
     return NextResponse.json(account, {
