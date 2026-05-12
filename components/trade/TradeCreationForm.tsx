@@ -2,6 +2,11 @@
 
 "use client"
 
+import {
+  useEffect,
+  useState
+} from "react"
+
 import { useForm } from "react-hook-form"
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -10,6 +15,13 @@ import {
   tradeSchema,
   TradeFormData
 } from "@/lib/validations/tradeSchema"
+
+interface Account {
+  id: string
+  name: string
+  balance: number
+  exchange?: string | null
+}
 
 export default function TradeCreationForm() {
   const {
@@ -24,56 +36,102 @@ export default function TradeCreationForm() {
     resolver: zodResolver(tradeSchema)
   })
 
-const entry = Number(
-  watch("entryPrice") || 0
-)
+  const [accounts, setAccounts] =
+    useState<Account[]>([])
 
-const stop = Number(
-  watch("stopLoss") || 0
-)
+  useEffect(() => {
+    async function fetchAccounts() {
+      try {
+        const res = await fetch(
+          "/api/accounts"
+        )
 
-const tp = Number(
-  watch("takeProfit") || 0
-)
+        if (!res.ok) {
+          throw new Error(
+            "Failed to fetch accounts"
+          )
+        }
 
-const size = Number(
-  watch("size") || 0
-)
- const risk =
-  entry != null &&
-  stop != null &&
-  size != null
-    ? Math.abs(
-        Number(entry) - Number(stop)
-      ) * Number(size)
-    : 0
+        const data = await res.json()
 
- const reward =
-  entry != null &&
-  tp != null &&
-  size != null
-    ? Math.abs(
-        Number(tp) - Number(entry)
-      ) * Number(size)
-    : 0
+        const formatted =
+          data.map((account: any) => ({
+            id: account.id,
+            name: account.name,
+            balance: Number(
+              account.balance
+            ),
+            exchange:
+              account.exchange
+          }))
+
+        setAccounts(formatted)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchAccounts()
+  }, [])
+
+  // =========================
+  // LIVE VALUES
+  // =========================
+
+  const entry = Number(
+    watch("entryPrice") || 0
+  )
+
+  const stop = Number(
+    watch("stopLoss") || 0
+  )
+
+  const tp = Number(
+    watch("takeProfit") || 0
+  )
+
+  const size = Number(
+    watch("size") || 0
+  )
+
+  // =========================
+  // LIVE CALCULATIONS
+  // =========================
+
+  const risk =
+    Math.abs(entry - stop) * size
+
+  const reward =
+    Math.abs(tp - entry) * size
 
   const rr =
-    risk > 0 ? reward / risk : 0
+    risk > 0
+      ? reward / risk
+      : 0
+
+  const exposure = entry * size
+
+  // =========================
+  // SUBMIT
+  // =========================
 
   async function onSubmit(
     data: TradeFormData
   ) {
     try {
-      const res = await fetch("/api/trade", {
-        method: "POST",
+      const res = await fetch(
+        "/api/trade",
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-        body: JSON.stringify(data)
-      })
+          body: JSON.stringify(data)
+        }
+      )
 
       if (!res.ok) {
         throw new Error(
@@ -96,6 +154,8 @@ const size = Number(
   return (
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-7xl mx-auto">
+        {/* HEADER */}
+
         <div className="mb-10">
           <h1 className="text-4xl font-bold">
             Create Trade
@@ -106,6 +166,8 @@ const size = Number(
             journal
           </p>
         </div>
+
+        {/* FORM */}
 
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -156,6 +218,64 @@ const size = Number(
                 </select>
               </div>
 
+              {/* ACCOUNT */}
+
+              <div>
+                <label className="text-sm text-zinc-400">
+                  Account
+                </label>
+
+                <select
+                  {...register("accountId")}
+                  className="w-full mt-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 outline-none"
+                >
+                  <option value="">
+                    Select account
+                  </option>
+
+                  {accounts.map(
+                    (account) => (
+                      <option
+                        key={account.id}
+                        value={
+                          account.id
+                        }
+                      >
+                        {
+                          account.name
+                        }{" "}
+                        — $
+                        {account.balance.toFixed(
+                          2
+                        )}
+                      </option>
+                    )
+                  )}
+                </select>
+
+                {errors.accountId && (
+                  <p className="text-red-500 text-sm mt-1">
+                    Select an account
+                  </p>
+                )}
+              </div>
+
+              {/* LEVERAGE */}
+
+              <div>
+                <label className="text-sm text-zinc-400">
+                  Leverage
+                </label>
+
+                <input
+                  type="number"
+                  {...register(
+                    "leverage"
+                  )}
+                  className="w-full mt-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 outline-none"
+                />
+              </div>
+
               {/* ENTRY */}
 
               <div>
@@ -166,7 +286,9 @@ const size = Number(
                 <input
                   type="number"
                   step="0.0001"
-                  {...register("entryPrice")}
+                  {...register(
+                    "entryPrice"
+                  )}
                   className="w-full mt-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 outline-none"
                 />
               </div>
@@ -181,12 +303,14 @@ const size = Number(
                 <input
                   type="number"
                   step="0.0001"
-                  {...register("stopLoss")}
+                  {...register(
+                    "stopLoss"
+                  )}
                   className="w-full mt-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 outline-none"
                 />
               </div>
 
-              {/* TP */}
+              {/* TAKE PROFIT */}
 
               <div>
                 <label className="text-sm text-zinc-400">
@@ -196,7 +320,9 @@ const size = Number(
                 <input
                   type="number"
                   step="0.0001"
-                  {...register("takeProfit")}
+                  {...register(
+                    "takeProfit"
+                  )}
                   className="w-full mt-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 outline-none"
                 />
               </div>
@@ -205,40 +331,13 @@ const size = Number(
 
               <div>
                 <label className="text-sm text-zinc-400">
-                  Size
+                  Position Size
                 </label>
 
                 <input
                   type="number"
                   step="0.01"
                   {...register("size")}
-                  className="w-full mt-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 outline-none"
-                />
-              </div>
-
-              {/* LEVERAGE */}
-
-              <div>
-                <label className="text-sm text-zinc-400">
-                  Leverage
-                </label>
-
-                <input
-                  type="number"
-                  {...register("leverage")}
-                  className="w-full mt-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 outline-none"
-                />
-              </div>
-
-              {/* ACCOUNT */}
-
-              <div>
-                <label className="text-sm text-zinc-400">
-                  Account ID
-                </label>
-
-                <input
-                  {...register("accountId")}
                   className="w-full mt-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 outline-none"
                 />
               </div>
@@ -254,9 +353,11 @@ const size = Number(
               <textarea
                 rows={6}
                 placeholder="Describe liquidity behavior..."
-                className="w-full mt-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 outline-none"
+                className="w-full mt-2 rounded-2xl bg-zinc-900 border border-zinc-800 px-4 py-3 outline-none resize-none"
               />
             </div>
+
+            {/* BUTTON */}
 
             <button
               type="submit"
@@ -293,7 +394,7 @@ const size = Number(
                 />
 
                 <Metric
-                  title="RR"
+                  title="Risk / Reward"
                   value={`${rr.toFixed(
                     2
                   )} RR`}
@@ -301,10 +402,9 @@ const size = Number(
 
                 <Metric
                   title="Exposure"
-                  value={`$${(
-                    (entry || 0) *
-                    (size || 0)
-                  ).toFixed(2)}`}
+                  value={`$${exposure.toFixed(
+                    2
+                  )}`}
                 />
               </div>
             </div>
