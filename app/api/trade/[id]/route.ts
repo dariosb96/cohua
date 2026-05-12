@@ -1,101 +1,109 @@
-import { NextResponse } from "next/server"
-import { getTrade, updateTrade, deleteTrade } from "@/services/tradeService"
+// app/api/trade/[id]/route.ts
 
-// GET -> obtener uno
+import { NextRequest, NextResponse } from "next/server"
+
+import {
+  getTrade,
+  updateTrade,
+  deleteTrade
+} from "@/services/tradeService"
+
+interface Params {
+  params: Promise<{
+    id: string
+  }>
+}
+
 export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  _: NextRequest,
+  { params }: Params
 ) {
   try {
-    const { id } = await params
+    const { id } =
+      await params
 
-    const trade = await getTrade(id)
+    const trade =
+      await getTrade(id)
 
-    if (!trade) {
-      return NextResponse.json(
-        { error: "Trade not found" },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(trade)
-  } catch (error) {
     return NextResponse.json(
-      { error: "Error fetching trade" },
-      { status: 500 }
+      trade
     )
-  }
-}
-// PUT -> actualizar completo
-export async function PUT(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
-    const data = await req.json()
-
-    const updatedTrade = await updateTrade(id, data)
-
-    return NextResponse.json(updatedTrade)
   } catch (error: any) {
-    if (error.message === "Trade not found") {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 404 }
-      )
-    }
+    console.error(error)
 
     return NextResponse.json(
-      { error: "Error updating trade" },
-      { status: 500 }
+      {
+        error:
+          error.message ||
+          "Trade not found"
+      },
+      {
+        status: 404
+      }
     )
   }
 }
 
-// PATCH -> actualización parcial
 export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: Params
 ) {
   try {
-    const { id } = await params
-    const data = await req.json()
+    const { id } =
+      await params
 
-    const updatedTrade = await updateTrade(id, data)
+    const body = await req.json()
 
-    return NextResponse.json(updatedTrade)
-  } catch (error: any) {
-    if (error.message === "Trade not found") {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 404 }
+    const trade =
+      await updateTrade(
+        id,
+        body
       )
-    }
 
     return NextResponse.json(
-      { error: "Error updating trade" },
-      { status: 500 }
+      trade
+    )
+  } catch (error: any) {
+    console.error(error)
+
+    return NextResponse.json(
+      {
+        error:
+          error.message ||
+          "Error updating trade"
+      },
+      {
+        status: 500
+      }
     )
   }
 }
-// DELETE -> eliminar
+
 export async function DELETE(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  _: NextRequest,
+  { params }: Params
 ) {
   try {
-    const { id } = await params
+    const { id } =
+      await params
 
     await deleteTrade(id)
 
     return NextResponse.json({
-      message: "Trade deleted successfully"
+      success: true
     })
-  } catch (error) {
+  } catch (error: any) {
+    console.error(error)
+
     return NextResponse.json(
-      { error: "Error deleting trade" },
-      { status: 500 }
+      {
+        error:
+          error.message ||
+          "Error deleting trade"
+      },
+      {
+        status: 500
+      }
     )
   }
 }

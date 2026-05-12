@@ -1,139 +1,228 @@
+// services/tradeService.ts
+
 import prisma from "@/lib/prisma"
-
-import { calculateTradeMetrics } from "@/lib/tradeCalculator"
-
-import { authOptions } from "@/lib/authOptions"
 
 import { getServerSession } from "next-auth"
 
-export async function createTrade(data: any) {
-  const session = await getServerSession(authOptions)
+import { authOptions } from "@/lib/authOptions"
+
+export async function createTrade(
+  data: any
+) {
+  const session =
+    await getServerSession(
+      authOptions
+    )
 
   if (!session?.user?.id) {
-    throw new Error("Unauthorized")
+    throw new Error(
+      "Unauthorized"
+    )
   }
 
-  const metrics = calculateTradeMetrics(
-    Number(data.entryPrice),
-    Number(data.stopLoss),
-    Number(data.exitPrice),
-    Number(data.size)
-  )
+  const account =
+    await prisma.account.findFirst({
+      where: {
+        id: data.accountId,
 
-  return prisma.trade.create({
-    data: {
-      ...data,
+        userId:
+          session.user.id
+      }
+    })
 
-      riskAmount: metrics.risk,
+  if (!account) {
+    throw new Error(
+      "Account not found"
+    )
+  }
 
-      pnl: metrics.pnl,
+  const trade =
+    await prisma.trade.create({
+      data: {
+        symbol: data.symbol,
 
-      result: metrics.result
-    },
+        side: data.side,
 
-    include: {
-      setup: true,
+        leverage:
+          data.leverage,
 
-      tags: {
-        include: {
-          tag: true
+        status: "OPEN",
+
+        entryPrice:
+          data.entryPrice,
+
+        stopLoss:
+          data.stopLoss,
+
+        takeProfit:
+          data.takeProfit,
+
+        size: data.size,
+
+        riskAmount:
+          data.riskAmount,
+
+        rr: data.rr,
+
+        pnl: data.pnl || 0,
+
+        pnlPercent:
+          data.pnlPercent || 0,
+
+        balanceBefore:
+          account.balance,
+
+        conviction:
+          data.confluenceScore >=
+          80
+            ? "HIGH"
+            : data.confluenceScore >=
+              50
+            ? "MEDIUM"
+            : "LOW",
+
+        accountId:
+          data.accountId,
+
+        context: {
+          create: {
+            liquiditySweep:
+              data.confluences
+                ?.liquiditySweep,
+
+            reclaim:
+              data.confluences
+                ?.reclaim,
+
+            displacement:
+              data.confluences
+                ?.displacement,
+
+            bos:
+              data.confluences
+                ?.bos,
+
+            choch:
+              data.confluences
+                ?.choch,
+
+            ema15mTouch:
+              data.confluences
+                ?.ema15mTouch,
+
+            ema1hTouch:
+              data.confluences
+                ?.ema1hTouch,
+
+            obTouched:
+              data.confluences
+                ?.obTouched,
+
+            followedSetup:
+              data.confluences
+                ?.htfAligned
+          }
         }
       },
 
-      context: true,
+      include: {
+        context: true,
 
-      marketSnapshot: true,
+        account: true
+      }
+    })
 
-      executions: true,
-
-      confluences: true,
-
-      allocation: true
-    }
-  })
+  return trade
 }
 
 export async function getTrades() {
-  const session = await getServerSession(authOptions)
+  const session =
+    await getServerSession(
+      authOptions
+    )
 
   if (!session?.user?.id) {
-    throw new Error("Unauthorized")
+    throw new Error(
+      "Unauthorized"
+    )
   }
 
   return prisma.trade.findMany({
     where: {
       account: {
-        userId: session.user.id
+        userId:
+          session.user.id
+      }
+    },
+
+    include: {
+      context: true,
+
+      setup: true,
+
+      account: true,
+
+      tags: {
+        include: {
+          tag: true
+        }
       }
     },
 
     orderBy: {
       createdAt: "desc"
-    },
-
-    include: {
-      setup: true,
-
-      tags: {
-        include: {
-          tag: true
-        }
-      },
-
-      context: true,
-
-      marketSnapshot: true,
-
-      executions: true,
-
-      confluences: true,
-
-      allocation: true
     }
   })
 }
 
-export async function getTrade(id: string) {
-  const session = await getServerSession(authOptions)
+export async function getTrade(
+  id: string
+) {
+  const session =
+    await getServerSession(
+      authOptions
+    )
 
   if (!session?.user?.id) {
-    throw new Error("Unauthorized")
+    throw new Error(
+      "Unauthorized"
+    )
   }
 
-  const trade = await prisma.trade.findFirst({
-    where: {
-      id,
+  const trade =
+    await prisma.trade.findFirst({
+      where: {
+        id,
 
-      account: {
-        userId: session.user.id
-      }
-    },
-
-    include: {
-      setup: true,
-
-      ob: true,
-
-      tags: {
-        include: {
-          tag: true
+        account: {
+          userId:
+            session.user.id
         }
       },
 
-      context: true,
+      include: {
+        context: true,
 
-      marketSnapshot: true,
+        setup: true,
 
-      executions: true,
+        account: true,
 
-      confluences: true,
+        tags: {
+          include: {
+            tag: true
+          }
+        },
 
-      allocation: true
-    }
-  })
+        executions: true,
+
+        marketSnapshot: true
+      }
+    })
 
   if (!trade) {
-    throw new Error("Trade not found")
+    throw new Error(
+      "Trade not found"
+    )
   }
 
   return trade
@@ -143,106 +232,203 @@ export async function updateTrade(
   id: string,
   data: any
 ) {
-  const session = await getServerSession(authOptions)
+  const session =
+    await getServerSession(
+      authOptions
+    )
 
   if (!session?.user?.id) {
-    throw new Error("Unauthorized")
+    throw new Error(
+      "Unauthorized"
+    )
   }
 
-  const existing = await prisma.trade.findFirst({
-    where: {
-      id,
+  const existing =
+    await prisma.trade.findFirst({
+      where: {
+        id,
 
-      account: {
-        userId: session.user.id
-      }
-    }
-  })
-
-  if (!existing) {
-    throw new Error("Trade not found")
-  }
-
-  const entryPrice =
-    data.entryPrice ?? existing.entryPrice
-
-  const stopLoss =
-    data.stopLoss ?? existing.stopLoss
-
-  const exitPrice =
-    data.exitPrice ?? existing.exitPrice
-
-  const size =
-    data.size ?? existing.size
-
-  const metrics = calculateTradeMetrics(
-    Number(entryPrice),
-    Number(stopLoss),
-    Number(exitPrice),
-    Number(size)
-  )
-
-  return prisma.trade.update({
-    where: {
-      id
-    },
-
-    data: {
-      ...data,
-
-      riskAmount: metrics.risk,
-
-      pnl: metrics.pnl,
-
-      result: metrics.result
-    },
-
-    include: {
-      setup: true,
-
-      tags: {
-        include: {
-          tag: true
+        account: {
+          userId:
+            session.user.id
         }
       },
 
-      context: true,
-
-      marketSnapshot: true,
-
-      executions: true,
-
-      confluences: true,
-
-      allocation: true
-    }
-  })
-}
-
-export async function deleteTrade(id: string) {
-  const session = await getServerSession(authOptions)
-
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized")
-  }
-
-  const existing = await prisma.trade.findFirst({
-    where: {
-      id,
-
-      account: {
-        userId: session.user.id
+      include: {
+        context: true
       }
-    }
-  })
+    })
 
   if (!existing) {
-    throw new Error("Trade not found")
+    throw new Error(
+      "Trade not found"
+    )
   }
 
-  return prisma.trade.delete({
+  const updated =
+    await prisma.trade.update({
+      where: {
+        id
+      },
+
+      data: {
+        symbol:
+          data.symbol ??
+          existing.symbol,
+
+        side:
+          data.side ??
+          existing.side,
+
+        leverage:
+          data.leverage ??
+          existing.leverage,
+
+        entryPrice:
+          data.entryPrice ??
+          existing.entryPrice,
+
+        stopLoss:
+          data.stopLoss ??
+          existing.stopLoss,
+
+        takeProfit:
+          data.takeProfit ??
+          existing.takeProfit,
+
+        size:
+          data.size ??
+          existing.size,
+
+        pnl:
+          data.pnl ??
+          existing.pnl,
+
+        pnlPercent:
+          data.pnlPercent ??
+          existing.pnlPercent,
+
+        rr:
+          data.rr ??
+          existing.rr,
+
+        result:
+          data.result ??
+          existing.result,
+
+        status:
+          data.status ??
+          existing.status,
+
+        notes:
+          data.notes ??
+          existing.notes,
+
+        emotion:
+          data.emotion ??
+          existing.emotion,
+
+        closedAt:
+          data.closedAt ??
+          existing.closedAt,
+
+        context:
+          data.confluences
+            ? {
+                update: {
+                  liquiditySweep:
+                    data
+                      .confluences
+                      ?.liquiditySweep,
+
+                  reclaim:
+                    data
+                      .confluences
+                      ?.reclaim,
+
+                  displacement:
+                    data
+                      .confluences
+                      ?.displacement,
+
+                  bos:
+                    data
+                      .confluences
+                      ?.bos,
+
+                  choch:
+                    data
+                      .confluences
+                      ?.choch,
+
+                  ema15mTouch:
+                    data
+                      .confluences
+                      ?.ema15mTouch,
+
+                  ema1hTouch:
+                    data
+                      .confluences
+                      ?.ema1hTouch,
+
+                  obTouched:
+                    data
+                      .confluences
+                      ?.obTouched
+                }
+              }
+            : undefined
+      },
+
+      include: {
+        context: true,
+
+        account: true
+      }
+    })
+
+  return updated
+}
+
+export async function deleteTrade(
+  id: string
+) {
+  const session =
+    await getServerSession(
+      authOptions
+    )
+
+  if (!session?.user?.id) {
+    throw new Error(
+      "Unauthorized"
+    )
+  }
+
+  const existing =
+    await prisma.trade.findFirst({
+      where: {
+        id,
+
+        account: {
+          userId:
+            session.user.id
+        }
+      }
+    })
+
+  if (!existing) {
+    throw new Error(
+      "Trade not found"
+    )
+  }
+
+  await prisma.trade.delete({
     where: {
       id
     }
   })
+
+  return {
+    success: true
+  }
 }

@@ -1,31 +1,63 @@
-import { NextResponse } from "next/server"
-import { createTrade, getTrades } from "@/services/tradeService"
+// app/api/trade/route.ts
 
-// GET -> listar todos
+import { NextRequest, NextResponse } from "next/server"
+
+import {
+  createTrade,
+  getTrades
+} from "@/services/tradeService"
+
 export async function GET() {
   try {
-    const trades = await getTrades()
-    return NextResponse.json(trades)
-  } catch (error) {
+    const trades =
+      await getTrades()
+
     return NextResponse.json(
-      { error: "Error fetching trades" },
-      { status: 500 }
+      trades
+    )
+  } catch (error: any) {
+    console.error(error)
+
+    return NextResponse.json(
+      {
+        error:
+          error.message ||
+          "Error fetching trades"
+      },
+      {
+        status: 500
+      }
     )
   }
 }
 
-// POST -> crear trade
-export async function POST(req: Request) {
+export async function POST(
+  req: NextRequest
+) {
   try {
-    const data = await req.json()
+    const body = await req.json()
 
-    const trade = await createTrade(data)
+    const trade =
+      await createTrade(body)
 
-    return NextResponse.json(trade, { status: 201 })
-  } catch (error) {
     return NextResponse.json(
-      { error: "Error creating trade" },
-      { status: 500 }
+      trade,
+      {
+        status: 201
+      }
+    )
+  } catch (error: any) {
+    console.error(error)
+
+    return NextResponse.json(
+      {
+        error:
+          error.message ||
+          "Error creating trade"
+      },
+      {
+        status: 500
+      }
     )
   }
 }

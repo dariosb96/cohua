@@ -1,7 +1,10 @@
+
 import { z } from "zod"
 
 export const tradeSchema = z.object({
-  symbol: z.string().min(2),
+  symbol: z
+    .string()
+    .min(2, "Symbol required"),
 
   side: z.enum([
     "LONG",
@@ -16,13 +19,20 @@ export const tradeSchema = z.object({
     .number()
     .optional(),
 
-  size: z.coerce.number(),
+  size: z.coerce
+    .number()
+    .optional(),
 
   leverage: z.coerce
     .number()
     .optional(),
 
-  accountId: z.string()
+  riskPercent:
+    z.coerce.number(),
+
+  accountId: z
+    .string()
+    .min(1, "Select account")
 })
 
 export type TradeFormData =

@@ -1,84 +1,203 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/authOptions"
-import { redirect } from "next/navigation"
-import LogoutButton from "./logOutButton"
-import { accountService } from "@/services/accountService"
-import { Decimal } from "@prisma/client/runtime/library"
+"use client"
 
-export default async function DashboardPage() {
-  const session = await getServerSession(authOptions)
+import {
+  useEffect,
+  useState
+} from "react"
 
-  if (!session) {
-    redirect("/login")
+import EquityChart from "@/components/dashboard/EquityChart"
+
+interface DashboardData {
+  totalTrades: number
+
+  wins: number
+
+  losses: number
+
+  totalPnl: number
+
+  winRate: number
+
+  avgRR: number
+
+  highConvictionWins: number
+}
+
+export default function DashboardPage() {
+  const [dashboard, setDashboard] =
+    useState<DashboardData | null>(
+      null
+    )
+
+  const [equity, setEquity] =
+    useState<any[]>([])
+
+  const [stats, setStats] =
+    useState<any>(null)
+
+  const [loading, setLoading] =
+    useState(true)
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [
+          dashboardRes,
+          equityRes
+        ] = await Promise.all([
+          fetch(
+            "/api/dashboard"
+          ),
+
+          fetch("/api/equity")
+        ])
+
+        const dashboardJson =
+          await dashboardRes.json()
+
+        const equityJson =
+          await equityRes.json()
+
+        setDashboard(
+          dashboardJson
+        )
+
+        setEquity(
+          equityJson.equity
+        )
+
+        setStats(
+          equityJson.stats
+        )
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        Loading...
+      </div>
+    )
   }
 
-  if (!session.user?.id) {
-    redirect("/login")
+  if (!dashboard) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        Error loading dashboard
+      </div>
+    )
   }
-
-  const accounts = await accountService.getAll(session.user.id)
-
-  const totalBalance = accounts.reduce(
-    (acc: number, accItem: any) => acc + parseFloat(accItem.balance.toString()),
-    0
-  )
 
   return (
-    <div className="p-6 space-y-6">
-      
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <LogoutButton />
+    <div className="min-h-screen bg-black text-white p-10">
+      <div className="max-w-7xl mx-auto">
+        {/* HEADER */}
+
+        <div className="mb-12">
+          <h1 className="text-5xl font-bold">
+            COHUA
+          </h1>
+
+          <p className="text-zinc-500 mt-2">
+            Institutional Trading
+            Analytics
+          </p>
+        </div>
+
+        {/* METRICS */}
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+          <Card
+            title="Trades"
+            value={
+              dashboard.totalTrades
+            }
+          />
+
+          <Card
+            title="Win Rate"
+            value={`${dashboard.winRate.toFixed(
+              2
+            )}%`}
+          />
+
+          <Card
+            title="PnL"
+            value={`$${dashboard.totalPnl.toFixed(
+              2
+            )}`}
+          />
+
+          <Card
+            title="Avg RR"
+            value={dashboard.avgRR.toFixed(
+              2
+            )}
+          />
+
+          <Card
+            title="Peak Equity"
+            value={`$${stats?.peak?.toFixed(
+              2
+            )}`}
+          />
+
+          <Card
+            title="Max Drawdown"
+            value={`$${stats?.maxDrawdown?.toFixed(
+              2
+            )}`}
+          />
+
+          <Card
+            title="Wins"
+            value={
+              dashboard.wins
+            }
+          />
+
+          <Card
+            title="Losses"
+            value={
+              dashboard.losses
+            }
+          />
+        </div>
+
+        {/* CHART */}
+
+        <EquityChart
+          data={equity}
+        />
       </div>
+    </div>
+  )
+}
 
-      {/* User */}
-      <div className="bg-white shadow rounded p-4">
-        <h2 className="font-semibold">Usuario</h2>
-        <p>{session.user?.email}</p>
-      </div>
+function Card({
+  title,
+  value
+}: {
+  title: string
 
-      {/* 💰 Total Balance */}
-      <div className="bg-black text-white p-6 rounded-xl shadow">
-        <h2 className="text-lg">Balance total</h2>
-        <p className="text-3xl font-bold">
-          ${totalBalance.toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })}
-        </p>
-      </div>
+  value: string | number
+}) {
+  return (
+    <div className="rounded-3xl border border-zinc-800 bg-zinc-950 p-6">
+      <p className="text-zinc-500">
+        {title}
+      </p>
 
-      {/* 🏦 Accounts */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Cuentas</h2>
-
-        {accounts.length === 0 && (
-          <p className="text-gray-500">No tienes cuentas aún</p>
-        )}
-
-        {accounts.map((acc: any) => (
-          <div
-            key={acc.id}
-            className="bg-white shadow rounded p-4 flex justify-between"
-          >
-            <div>
-              <p className="font-semibold">{acc.name}</p>
-              <p className="text-sm text-gray-500">
-                {new Date(acc.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-
-            <p className="font-bold">
-              ${parseFloat(acc.balance.toString()).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              })}
-            </p>
-          </div>
-        ))}
-      </div>
-
+      <h2 className="text-4xl font-bold mt-4">
+        {value}
+      </h2>
     </div>
   )
 }
