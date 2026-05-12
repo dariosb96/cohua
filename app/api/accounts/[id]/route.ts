@@ -4,9 +4,9 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/authOptions"
 
 interface Params {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export async function GET(
@@ -23,8 +23,10 @@ export async function GET(
       )
     }
 
+    const { id } = await params
+
     const account = await accountService.getById(
-      params.id,
+      id,
       session.user.id
     )
 
@@ -33,7 +35,11 @@ export async function GET(
     console.error("GET ACCOUNT ERROR:", error)
 
     return NextResponse.json(
-      { error: error.message || "Cuenta no encontrada" },
+      {
+        error:
+          error.message ||
+          "Cuenta no encontrada"
+      },
       { status: 404 }
     )
   }
@@ -53,20 +59,30 @@ export async function PATCH(
       )
     }
 
+    const { id } = await params
+
     const body = await req.json()
 
-    const updated = await accountService.update(
-      params.id,
-      session.user.id,
-      body
-    )
+    const updated =
+      await accountService.update(
+        id,
+        session.user.id,
+        body
+      )
 
     return NextResponse.json(updated)
   } catch (error: any) {
-    console.error("UPDATE ACCOUNT ERROR:", error)
+    console.error(
+      "UPDATE ACCOUNT ERROR:",
+      error
+    )
 
     return NextResponse.json(
-      { error: error.message || "Error al actualizar cuenta" },
+      {
+        error:
+          error.message ||
+          "Error al actualizar cuenta"
+      },
       { status: 500 }
     )
   }
@@ -86,8 +102,10 @@ export async function DELETE(
       )
     }
 
+    const { id } = await params
+
     await accountService.delete(
-      params.id,
+      id,
       session.user.id
     )
 
@@ -96,10 +114,17 @@ export async function DELETE(
       message: "Cuenta eliminada"
     })
   } catch (error: any) {
-    console.error("DELETE ACCOUNT ERROR:", error)
+    console.error(
+      "DELETE ACCOUNT ERROR:",
+      error
+    )
 
     return NextResponse.json(
-      { error: error.message || "Error al eliminar cuenta" },
+      {
+        error:
+          error.message ||
+          "Error al eliminar cuenta"
+      },
       { status: 500 }
     )
   }
