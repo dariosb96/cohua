@@ -88,13 +88,13 @@ export default function EquityChart({
               >
                 <stop
                   offset="5%"
-                  stopColor="#22c55e"
+                  stopColor="#22c5ad"
                   stopOpacity={0.4}
                 />
 
                 <stop
                   offset="95%"
-                  stopColor="#22c55e"
+                  stopColor="#22aac5"
                   stopOpacity={0}
                 />
               </linearGradient>
