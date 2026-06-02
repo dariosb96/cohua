@@ -299,88 +299,92 @@ export default function TradeCreationForm() {
   // ====================================
   // SUBMIT
   // ====================================
+async function onSubmit(
+  data: TradeFormData
+) {
+  console.log(
+    "ON SUBMIT EXECUTED",
+    data
+  )
 
-  async function onSubmit(
-    data: TradeFormData
-  ) {
-    try {
-      const payload = {
-        ...data,
+  try {
+    const payload = {
+      ...data,
 
-        size: calculatedSize,
+      size: calculatedSize,
 
-        riskAmount,
+      riskAmount,
 
-        rr,
+      rr,
 
-        confluenceScore,
+      confluenceScore,
 
-        confluences,
+      confluences,
 
-        exposure,
+      exposure,
 
-        marginUsed,
+      marginUsed,
 
-        pnlAtTp,
+      pnlAtTp,
 
-        pnlAtSl
-      }
+      pnlAtSl
+    }
 
-      const res = await fetch(
-        "/api/trade",
-        {
-          method: "POST",
+    console.log(
+      "PAYLOAD",
+      payload
+    )
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+    const res = await fetch(
+      "/api/trade",
+      {
+        method: "POST",
 
-          body: JSON.stringify(
-            payload
-          )
-        }
-      )
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
 
-      if (!res.ok) {
-        throw new Error(
-          "Failed to create trade"
+        body: JSON.stringify(
+          payload
         )
       }
+    )
 
+    console.log(
+      "STATUS",
+      res.status
+    )
+
+    const responseData =
       await res.json()
 
-      alert("Trade created")
+    console.log(
+      "RESPONSE",
+      responseData
+    )
 
-      reset()
-
-      setConfluences({
-        liquiditySweep: false,
-
-        reclaim: false,
-
-        displacement: false,
-
-        bos: false,
-
-        choch: false,
-
-        ema15mTouch: false,
-
-        ema1hTouch: false,
-
-        obTouched: false,
-
-        htfAligned: false
-      })
-    } catch (error) {
-      console.error(error)
-
-      alert(
-        "Error creating trade"
+    if (!res.ok) {
+      throw new Error(
+        responseData.error ||
+          "Failed to create trade"
       )
     }
+
+    alert("Trade created")
+
+    reset()
+  } catch (error) {
+    console.error(
+      "SUBMIT ERROR",
+      error
+    )
+
+    alert(
+      "Error creating trade"
+    )
   }
+}
 
   return (
     <div className="min-h-screen bg-black text-white p-8">

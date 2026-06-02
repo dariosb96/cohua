@@ -37,6 +37,11 @@ export async function POST(
   try {
     const body = await req.json()
 
+    console.log(
+      "BODY RECEIVED",
+      body
+    )
+
     const trade =
       await createTrade(body)
 
@@ -47,13 +52,15 @@ export async function POST(
       }
     )
   } catch (error: any) {
-    console.error(error)
+    console.error(
+      "CREATE TRADE ERROR",
+      error
+    )
 
     return NextResponse.json(
       {
         error:
-          error.message ||
-          "Error creating trade"
+          error.message
       },
       {
         status: 500
