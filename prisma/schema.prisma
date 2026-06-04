@@ -12,18 +12,18 @@ datasource db {
 // ============================================================================
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  phone     String?  @unique
-  password  String
+  id       String  @id @default(uuid())
+  name     String
+  email    String  @unique
+  phone    String? @unique
+  password String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  accounts Account[]
-  setups   Setup[]
-  tags     Tag[]
+  accounts   Account[]
+  setups     Setup[]
+  tags       Tag[]
   alertRules AlertRule[]
   tradePlans TradePlan[]
 
@@ -31,25 +31,25 @@ model User {
 }
 
 model Account {
-  id        String   @id @default(uuid())
-  name      String
+  id   String @id @default(uuid())
+  name String
 
-  balance   Decimal  @db.Decimal(28, 8)
+  balance     Decimal  @db.Decimal(28, 8)
   balanceHigh Decimal? @db.Decimal(28, 8)
   balanceLow  Decimal? @db.Decimal(28, 8)
 
   exchange  Exchange?
   apiKey    String?
   apiSecret String?
-  isActive  Boolean  @default(true)
+  isActive  Boolean   @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  trades Trade[]
+  trades      Trade[]
   allocations PositionAllocation[]
 
   @@index([userId])
@@ -66,59 +66,59 @@ model Setup {
   name        String
   description String?
 
-  obType      OBType?
-  season      Season?
+  obType OBType?
+  season Season?
 
-  htf         Timeframe?
-  mtf         Timeframe?
-  ltf         Timeframe?
+  htf Timeframe?
+  mtf Timeframe?
+  ltf Timeframe?
 
   emaTouchRequired Boolean @default(true)
-  emaConfigHtf String?
-  emaConfigMtf String?
-  emaConfigLtf String?
+  emaConfigHtf     String?
+  emaConfigMtf     String?
+  emaConfigLtf     String?
 
-  isActive    Boolean @default(true)
+  isActive Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  trades Trade[]
-  backTests BackTest[]
+  trades            Trade[]
+  backTests         BackTest[]
   confluenceRecords EMAConfluence[]
 
+  @@unique([userId, name])
   @@index([userId])
   @@index([obType])
-  @@unique([userId, name])
 }
 
 model OrderBlock {
   id String @id @default(uuid())
 
-  symbol   String
+  symbol    String
   timeframe Timeframe?
 
-  highPrice   Decimal @db.Decimal(28, 8)
-  lowPrice    Decimal @db.Decimal(28, 8)
-  midPrice    Decimal @db.Decimal(28, 8)
+  highPrice Decimal @db.Decimal(28, 8)
+  lowPrice  Decimal @db.Decimal(28, 8)
+  midPrice  Decimal @db.Decimal(28, 8)
 
-  obType      OBType
+  obType OBType
 
-  isBroken    Boolean @default(false)
-  brokenAt    DateTime?
+  isBroken Boolean   @default(false)
+  brokenAt DateTime?
 
-  isClaimed   Boolean @default(false)
-  claimedAt   DateTime?
+  isClaimed Boolean   @default(false)
+  claimedAt DateTime?
 
   liquidityZones String?
 
-  trendAtOB   TrendBias?
-  volumeAtOB  Decimal? @db.Decimal(28, 8)
+  trendAtOB  TrendBias?
+  volumeAtOB Decimal?   @db.Decimal(28, 8)
 
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   expiresAt DateTime?
 
   trades Trade[]
@@ -147,21 +147,21 @@ model Trade {
 
   conviction Conviction?
 
-  entryPrice    Decimal @db.Decimal(28, 8)
-  exitPrice     Decimal? @db.Decimal(28, 8)
+  entryPrice Decimal  @db.Decimal(28, 8)
+  exitPrice  Decimal? @db.Decimal(28, 8)
 
-  stopLoss      Decimal? @db.Decimal(28, 8)
-  takeProfit    Decimal? @db.Decimal(28, 8)
+  stopLoss   Decimal? @db.Decimal(28, 8)
+  takeProfit Decimal? @db.Decimal(28, 8)
 
-  tp1Price      Decimal? @db.Decimal(28, 8)
-  tp2Price      Decimal? @db.Decimal(28, 8)
+  tp1Price        Decimal? @db.Decimal(28, 8)
+  tp2Price        Decimal? @db.Decimal(28, 8)
   actualExitPrice Decimal? @db.Decimal(28, 8)
 
   size Decimal @db.Decimal(28, 8)
 
   riskAmount Decimal? @db.Decimal(28, 8)
 
-  pnl Decimal? @db.Decimal(28, 8)
+  pnl        Decimal? @db.Decimal(28, 8)
   pnlPercent Decimal? @db.Decimal(10, 4)
 
   fee Decimal? @db.Decimal(28, 8)
@@ -177,29 +177,33 @@ model Trade {
 
   emotion Emotion?
 
+  postExit PostExit?
+
+  postExitNotes String?
+
   notes String?
 
   imageUrl String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   closedAt  DateTime?
 
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   setupId String?
-  setup   Setup? @relation(fields: [setupId], references: [id], onDelete: SetNull)
+  setup   Setup?  @relation(fields: [setupId], references: [id], onDelete: SetNull)
 
   obId String?
   ob   OrderBlock? @relation(fields: [obId], references: [id], onDelete: SetNull)
 
-  context TradeContext?
+  context        TradeContext?
   marketSnapshot MarketSnapshot?
-  executions TradeExecution[]
-  tags TradeTag[]
-  confluences EMAConfluence[]
-  allocation PositionAllocation?
+  executions     TradeExecution[]
+  tags           TradeTag[]
+  confluences    EMAConfluence[]
+  allocation     PositionAllocation?
 
   @@index([accountId, createdAt])
   @@index([symbol])
@@ -230,7 +234,7 @@ model TradeExecution {
   createdAt DateTime @default(now())
 
   tradeId String
-  trade   Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
 
   @@index([tradeId])
 }
@@ -238,14 +242,37 @@ model TradeExecution {
 model TradeContext {
   id String @id @default(uuid())
 
-  timeframe String?
+  // =========================
+  // EXCEL
+  // =========================
 
-  htfTrend TrendBias?
-  mtfTrend TrendBias?
-  ltfTrend TrendBias?
+  origin SetupOrigin?
+
+  quality SetupQuality?
+
+  sweep Boolean @default(false)
+
+  liquidityType LiquidityType?
+
+  fvgVisible   Boolean    @default(false)
+  fvgTimeframe Timeframe?
+  fvgCount     Int?
+
+  obVisible   Boolean    @default(false)
+  obTimeframe Timeframe?
+  obCount     Int?
+
+  liquidityTimeframe Timeframe?
+
+  supportResistance Boolean @default(false)
+
+  blindEntry Boolean @default(false)
+
+  // =========================
+  // CONFLUENCIAS
+  // =========================
 
   liquiditySweep Boolean @default(false)
-  sweepConfirmed Boolean @default(false)
 
   reclaim Boolean @default(false)
 
@@ -256,14 +283,26 @@ model TradeContext {
   bos Boolean @default(false)
 
   ema15mTouch Boolean @default(false)
-  ema1hTouch Boolean @default(false)
-  emaConfluenceAtEntry Boolean @default(false)
-  emaConfluenceAtExit Boolean @default(false)
-  emaConfluencePrice Decimal? @db.Decimal(28, 8)
 
-  obTouched Boolean @default(false)
-  obType OBType?
-  obLevel String?
+  ema1hTouch Boolean @default(false)
+
+  htfAligned Boolean @default(false)
+
+  // =========================
+  // LEGACY
+  // =========================
+
+  timeframe String?
+
+  htfTrend TrendBias?
+  mtfTrend TrendBias?
+  ltfTrend TrendBias?
+
+  emaConfluenceAtEntry Boolean @default(false)
+
+  emaConfluenceAtExit Boolean @default(false)
+
+  emaConfluencePrice Decimal? @db.Decimal(28, 8)
 
   session Session?
 
@@ -272,20 +311,21 @@ model TradeContext {
   notes String?
 
   tradeId String @unique
-  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
 }
 
 model EMAConfluence {
   id String @id @default(uuid())
 
   setupId String?
-  setup   Setup? @relation(fields: [setupId], references: [id], onDelete: SetNull)
+  setup   Setup?  @relation(fields: [setupId], references: [id], onDelete: SetNull)
 
-  ema15mPrice Decimal @db.Decimal(28, 8)
-  ema1hPrice  Decimal @db.Decimal(28, 8)
+  ema15mPrice Decimal  @db.Decimal(28, 8)
+  ema1hPrice  Decimal  @db.Decimal(28, 8)
   ema4hPrice  Decimal? @db.Decimal(28, 8)
 
-  isAligned   Boolean @default(false)
+  isAligned    Boolean  @default(false)
   alignmentGap Decimal? @db.Decimal(10, 4)
 
   tradingPhase ConfluencePhase
@@ -295,7 +335,7 @@ model EMAConfluence {
   detectedAt DateTime @default(now())
 
   tradeId String
-  trade   Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
 
   @@index([tradeId])
   @@index([isAligned])
@@ -309,11 +349,11 @@ model EMAConfluence {
 model MarketSnapshot {
   id String @id @default(uuid())
 
-  volume Decimal? @db.Decimal(28, 8)
-  volatility Decimal? @db.Decimal(10, 2)
+  volume      Decimal? @db.Decimal(28, 8)
+  volatility  Decimal? @db.Decimal(10, 2)
   percentMove Decimal? @db.Decimal(10, 2)
 
-  fundingRate Decimal? @db.Decimal(10, 4)
+  fundingRate  Decimal? @db.Decimal(10, 4)
   openInterest Decimal? @db.Decimal(28, 8)
 
   btcTrend TrendBias?
@@ -330,7 +370,7 @@ model AlertRule {
 
   name String
 
-  symbol String
+  symbol    String
   alertType AlertType
 
   condition String
@@ -341,7 +381,7 @@ model AlertRule {
   updatedAt DateTime @updatedAt
 
   userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, symbol])
 }
@@ -354,24 +394,24 @@ model BackTest {
   id String @id @default(uuid())
 
   setupId String
-  setup   Setup @relation(fields: [setupId], references: [id], onDelete: Cascade)
+  setup   Setup  @relation(fields: [setupId], references: [id], onDelete: Cascade)
 
   symbol    String
   startDate DateTime
   endDate   DateTime
 
-  totalTrades    Int
-  winTrades      Int
-  lossTrades     Int
-  beaTrades      Int
+  totalTrades Int
+  winTrades   Int
+  lossTrades  Int
+  beaTrades   Int
 
-  winRate        Decimal @db.Decimal(5, 2)
-  avgWin         Decimal @db.Decimal(10, 2)
-  avgLoss        Decimal @db.Decimal(10, 2)
-  profitFactor   Decimal @db.Decimal(10, 2)
+  winRate      Decimal @db.Decimal(5, 2)
+  avgWin       Decimal @db.Decimal(10, 2)
+  avgLoss      Decimal @db.Decimal(10, 2)
+  profitFactor Decimal @db.Decimal(10, 2)
 
-  maxDrawdown    Decimal @db.Decimal(10, 2)
-  returnOnRisk   Decimal @db.Decimal(10, 2)
+  maxDrawdown  Decimal @db.Decimal(10, 2)
+  returnOnRisk Decimal @db.Decimal(10, 2)
 
   sweepOccurrence Decimal @db.Decimal(5, 2)
 
@@ -390,18 +430,18 @@ model PositionAllocation {
   id String @id @default(uuid())
 
   tradeId String @unique
-  trade   Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
 
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
-  riskDollars    Decimal @db.Decimal(28, 8)
-  riskPercent    Decimal @db.Decimal(5, 2)
+  riskDollars Decimal @db.Decimal(28, 8)
+  riskPercent Decimal @db.Decimal(5, 2)
 
-  rewardDollars  Decimal @db.Decimal(28, 8)
-  rewardPercent  Decimal @db.Decimal(5, 2)
+  rewardDollars Decimal @db.Decimal(28, 8)
+  rewardPercent Decimal @db.Decimal(5, 2)
 
-  rrRatio        Decimal @db.Decimal(5, 2)
+  rrRatio Decimal @db.Decimal(5, 2)
 
   createdAt DateTime @default(now())
 
@@ -412,14 +452,14 @@ model TradePlan {
   id String @id @default(uuid())
 
   userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  month      String
+  month String
 
   maxTrades  Int
   tradesUsed Int @default(0)
 
-  targetReturn Decimal @db.Decimal(10, 2)
+  targetReturn Decimal  @db.Decimal(10, 2)
   actualReturn Decimal? @db.Decimal(10, 2)
 
   notes String?
@@ -437,13 +477,13 @@ model TradePlan {
 model Tag {
   id String @id @default(uuid())
 
-  name String
+  name  String
   color String?
 
   createdAt DateTime @default(now())
 
   userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   trades TradeTag[]
 
@@ -559,4 +599,51 @@ enum ConfluencePhase {
   FIRST_TP
   SWEEP_SETUP
   SECOND_TP
+}
+
+enum SetupOrigin {
+  OB_RECLAIM
+  OB_SWEEP
+
+  EMA_RECLAIM
+  EMA_CONFLUENCE
+
+  FVG_RECLAIM
+  FVG_CONTINUATION
+
+  RANGE_BREAKOUT
+
+  MANUAL
+}
+
+enum SetupQuality {
+  A_PLUS
+  A
+  B
+  C
+  D
+}
+
+enum LiquidityType {
+  BSL
+  SSL
+
+  EQH
+  EQL
+
+  ASIA_HIGH
+  ASIA_LOW
+
+  LONDON_HIGH
+  LONDON_LOW
+
+  NY_HIGH
+  NY_LOW
+}
+
+enum PostExit {
+  RUN
+  REV
+  RNG
+  SWP
 }

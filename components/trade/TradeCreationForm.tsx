@@ -41,25 +41,24 @@ export default function TradeCreationForm() {
   // FORM
   // ====================================
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    reset,
-    formState: {
-      errors,
-      isSubmitting
-    }
-  } = useForm<TradeFormData>({
-    resolver: zodResolver(
-      tradeSchema
-    ),
+const {
+  register,
+  handleSubmit,
+  watch,
+  reset,
+  formState: {
+    errors,
+    isSubmitting
+  }
+} =useForm({
+  resolver: zodResolver(tradeSchema),
 
-    defaultValues: {
-      side: "LONG",
-      riskPercent: 1
-    }
-  })
+  defaultValues: {
+    side: "LONG",
+
+    riskPercent: 1
+  }
+})
 
   // ====================================
   // ACCOUNTS
