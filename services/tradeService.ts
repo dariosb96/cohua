@@ -1,5 +1,3 @@
-// services/tradeService.ts
-
 import prisma from "@/lib/prisma"
 
 import { getServerSession } from "next-auth"
@@ -114,9 +112,9 @@ export async function createTrade(
               data.confluences
                 ?.ema1hTouch,
 
-            obTouched:
-              data.confluences
-                ?.obTouched,
+           obVisible:
+  data.confluences
+    ?.obTouched,
 
             followedSetup:
               data.confluences
@@ -371,10 +369,9 @@ export async function updateTrade(
                       .confluences
                       ?.ema1hTouch,
 
-                  obTouched:
-                    data
-                      .confluences
-                      ?.obTouched
+                  obVisible:
+  data.confluences
+    ?.obTouched,
                 }
               }
             : undefined
