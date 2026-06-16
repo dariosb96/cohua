@@ -5,132 +5,183 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/authOptions"
 
 export async function createTrade(
-  data: any
+  data:any
 ) {
+
   const session =
-    await getServerSession(
-      authOptions
-    )
+    await getServerSession(authOptions)
+
 
   if (!session?.user?.id) {
-    throw new Error(
-      "Unauthorized"
-    )
+    throw new Error("Unauthorized")
   }
+
 
   const account =
     await prisma.account.findFirst({
-      where: {
-        id: data.accountId,
-
-        userId:
-          session.user.id
+      where:{
+        id:data.accountId,
+        userId:session.user.id
       }
     })
 
-  if (!account) {
-    throw new Error(
-      "Account not found"
-    )
+
+  if(!account){
+    throw new Error("Account not found")
   }
 
-  const trade =
-    await prisma.trade.create({
-      data: {
-        symbol: data.symbol,
 
-        side: data.side,
 
-        leverage:
-          data.leverage,
+  return prisma.trade.create({
 
-        status: "OPEN",
+    data:{
 
-        entryPrice:
-          data.entryPrice,
+      symbol:data.symbol,
 
-        stopLoss:
-          data.stopLoss,
+      side:data.side,
 
-        takeProfit:
-          data.takeProfit,
+      leverage:
+        data.leverage
+        ? Math.round(data.leverage)
+        : null,
 
-        size: data.size,
 
-        riskAmount:
-          data.riskAmount,
+      status:"OPEN",
 
-        rr: data.rr,
 
-        pnl: data.pnl || 0,
+      entryPrice:
+        data.entryPrice,
 
-        pnlPercent:
-          data.pnlPercent || 0,
 
-        balanceBefore:
-          account.balance,
+      stopLoss:
+        data.stopLoss,
 
-        conviction:
-          data.confluenceScore >=
-          80
-            ? "HIGH"
-            : data.confluenceScore >=
-              50
-            ? "MEDIUM"
-            : "LOW",
 
-        accountId:
-          data.accountId,
+      takeProfit:
+        data.takeProfit,
 
-        context: {
-          create: {
-            liquiditySweep:
-              data.confluences
-                ?.liquiditySweep,
 
-            reclaim:
-              data.confluences
-                ?.reclaim,
+      size:
+        data.size,
 
-            displacement:
-              data.confluences
-                ?.displacement,
 
-            bos:
-              data.confluences
-                ?.bos,
+      riskAmount:
+        data.riskAmount,
 
-            choch:
-              data.confluences
-                ?.choch,
 
-            ema15mTouch:
-              data.confluences
-                ?.ema15mTouch,
+      rr:
+        data.rr,
 
-            ema1hTouch:
-              data.confluences
-                ?.ema1hTouch,
 
-           obVisible:
-  data.confluences
-    ?.obTouched,
+      pnl:
+        data.pnl ?? 0,
 
-            followedSetup:
-              data.confluences
-                ?.htfAligned
-          }
+
+      pnlPercent:
+        data.pnlPercent ?? 0,
+
+
+
+      balanceBefore:
+        account.balance,
+
+
+
+      conviction:
+        data.confluenceScore >= 80
+        ? "HIGH"
+        : data.confluenceScore >= 50
+        ? "MEDIUM"
+        : "LOW",
+
+
+
+      accountId:
+        data.accountId,
+
+
+
+      context:{
+
+
+        create:{
+
+
+          sweep:
+            data.sweep ?? false,
+
+
+          liquiditySweep:
+            data.confluences
+            ?.liquiditySweep
+            ?? false,
+
+
+          reclaim:
+            data.confluences
+            ?.reclaim
+            ?? false,
+
+
+          displacement:
+            data.confluences
+            ?.displacement
+            ?? false,
+
+
+          bos:
+            data.confluences
+            ?.bos
+            ?? false,
+
+
+          choch:
+            data.confluences
+            ?.choch
+            ?? false,
+
+
+          ema15mTouch:
+            data.confluences
+            ?.ema15mTouch
+            ?? false,
+
+
+          ema1hTouch:
+            data.confluences
+            ?.ema1hTouch
+            ?? false,
+
+
+          htfAligned:
+            data.confluences
+            ?.htfAligned
+            ?? false,
+
+
+          obVisible:
+            data.confluences
+            ?.obTouched
+            ?? false,
+
+
+          notes:
+            data.notes ?? null
+
         }
-      },
 
-      include: {
-        context: true,
-
-        account: true
       }
-    })
 
-  return trade
+    },
+
+
+    include:{
+      context:true,
+      account:true
+    }
+
+  })
+
 }
 
 export async function getTrades() {
@@ -331,50 +382,65 @@ export async function updateTrade(
           existing.closedAt,
 
         context:
-          data.confluences
-            ? {
-                update: {
-                  liquiditySweep:
-                    data
-                      .confluences
-                      ?.liquiditySweep,
+data.confluences
+? {
 
-                  reclaim:
-                    data
-                      .confluences
-                      ?.reclaim,
+ update: {
 
-                  displacement:
-                    data
-                      .confluences
-                      ?.displacement,
 
-                  bos:
-                    data
-                      .confluences
-                      ?.bos,
+  sweep:
+    data.sweep
+    ?? existing.context?.sweep,
 
-                  choch:
-                    data
-                      .confluences
-                      ?.choch,
 
-                  ema15mTouch:
-                    data
-                      .confluences
-                      ?.ema15mTouch,
+  liquiditySweep:
+    data.confluences.liquiditySweep
+    ?? existing.context?.liquiditySweep,
 
-                  ema1hTouch:
-                    data
-                      .confluences
-                      ?.ema1hTouch,
 
-                  obVisible:
-  data.confluences
-    ?.obTouched,
-                }
-              }
-            : undefined
+  reclaim:
+    data.confluences.reclaim
+    ?? existing.context?.reclaim,
+
+
+  displacement:
+    data.confluences.displacement
+    ?? existing.context?.displacement,
+
+
+  bos:
+    data.confluences.bos
+    ?? existing.context?.bos,
+
+
+  choch:
+    data.confluences.choch
+    ?? existing.context?.choch,
+
+
+  ema15mTouch:
+    data.confluences.ema15mTouch
+    ?? existing.context?.ema15mTouch,
+
+
+  ema1hTouch:
+    data.confluences.ema1hTouch
+    ?? existing.context?.ema1hTouch,
+
+
+  htfAligned:
+    data.confluences.htfAligned
+    ?? existing.context?.htfAligned,
+
+
+  obVisible:
+    data.confluences.obTouched
+    ?? existing.context?.obVisible
+
+ }
+
+}
+: undefined
       },
 
       include: {
