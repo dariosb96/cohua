@@ -3,81 +3,189 @@ import Credentials from "next-auth/providers/credentials"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
+
 export const authOptions: AuthOptions = {
-  session: {
-    strategy: "jwt"
+
+  session:{
+    strategy:"jwt"
   },
 
-  providers: [
+
+  providers:[
+
     Credentials({
-      name: "Credentials",
-      credentials: {
-        email: {
-          label: "Email",
-          type: "email",
-          placeholder: "correo@ejemplo.com"
+
+      name:"Credentials",
+
+      credentials:{
+
+        email:{
+          label:"Email",
+          type:"email"
         },
-        password: {
-          label: "Password",
-          type: "password"
+
+        password:{
+          label:"Password",
+          type:"password"
         }
+
       },
 
-      async authorize(credentials) {
-        try {
-          if (!credentials?.email || !credentials?.password) {
+
+      async authorize(credentials){
+
+        try{
+
+          if(
+            !credentials?.email ||
+            !credentials?.password
+          ){
             return null
           }
 
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email }
-          })
 
-          if (!user) return null
 
-          const isValid = await bcrypt.compare(
-            credentials.password,
-            user.password
-          )
+          const user =
+            await prisma.user.findUnique({
+              where:{
+                email:credentials.email
+              }
+            })
 
-          if (!isValid) return null
 
-          // ⚠️ importante: regresar objeto plano
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name
+
+          if(!user)
+            return null
+
+
+
+          if(!user.isActive || user.isBanned){
+            return null
           }
 
-        } catch (error) {
-          console.error("AUTH ERROR:", error)
+
+
+          const isValid =
+            await bcrypt.compare(
+              credentials.password,
+              user.password
+            )
+
+
+
+          if(!isValid)
+            return null
+
+
+
+          return {
+
+            id:user.id,
+
+            name:user.name,
+
+            username:user.username,
+
+            email:user.email,
+
+            role:user.role,
+
+            plan:user.plan
+
+          }
+
+
+        }catch(error){
+
+          console.error(
+            "AUTH ERROR:",
+            error
+          )
+
           return null
+
         }
+
       }
+
     })
+
   ],
 
-  callbacks: {
-    async jwt({ token, user }) {
-      // cuando el usuario inicia sesión
-      if (user) {
-        token.id = user.id
+
+
+  callbacks:{
+
+
+    async jwt({token,user}){
+
+
+      if(user){
+
+        token.id =
+          user.id
+
+
+        token.username =
+          user.username
+
+
+        token.role =
+          user.role
+
+
+        token.plan =
+          user.plan
+
       }
+
+
       return token
+
     },
 
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string
+
+
+    async session({session,token}){
+
+
+      if(session.user){
+
+        session.user.id =
+          token.id as string
+
+
+        session.user.username =
+          token.username as string
+
+
+        session.user.role =
+          token.role as string
+
+
+        session.user.plan =
+          token.plan as string
+
       }
+
+
       return session
+
     }
+
+
   },
 
-  pages: {
-    signIn: "/login",     // opcional (tu página)
-    error: "/login"       // evita /api/auth/error
+
+  pages:{
+
+    signIn:"/login",
+
+    error:"/login"
+
   },
 
-  secret: process.env.NEXTAUTH_SECRET
+
+  secret:process.env.NEXTAUTH_SECRET
+
 }

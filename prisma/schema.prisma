@@ -12,14 +12,73 @@ datasource db {
 // ============================================================================
 
 model User {
-  id       String  @id @default(uuid())
+  id String @id @default(uuid())
+
+
+  // =========================
+  // IDENTIDAD
+  // =========================
+
   name     String
-  email    String  @unique
+  username String @unique
+  email    String @unique
+  emailVerified DateTime?
+
   phone    String? @unique
   password String
 
+
+  // =========================
+  // PERFIL
+  // =========================
+
+  avatar String?
+  bio    String?
+
+
+  // =========================
+  // PERMISOS / MEMBRESIA
+  // =========================
+
+  role UserRole @default(USER)
+  plan UserPlan @default(FREE)
+
+  planExpiresAt DateTime?
+
+  isActive Boolean @default(true)
+  isBanned Boolean @default(false)
+
+
+  // =========================
+  // SEGURIDAD
+  // =========================
+
+  lastLogin DateTime?
+
+  failedLoginAttempts Int @default(0)
+  lockedUntil DateTime?
+
+
+  // =========================
+  // PREFERENCIAS
+  // =========================
+
+  timezone String @default("America/Mexico_City")
+
+  defaultTimeframe Timeframe?
+
+
+  // =========================
+  // AUDITORIA
+  // =========================
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+
+  // =========================
+  // RELACIONES
+  // =========================
 
   accounts   Account[]
   setups     Setup[]
@@ -27,8 +86,28 @@ model User {
   alertRules AlertRule[]
   tradePlans TradePlan[]
 
+
+  // =========================
+  // ADMIN / CREACION DE USUARIOS
+  // =========================
+
+  createdUsers User[] @relation("UserCreator")
+
+  createdById String?
+
+  createdBy User? @relation(
+    "UserCreator",
+    fields: [createdById],
+    references: [id]
+  )
+
+
   @@index([email])
+  @@index([username])
+  @@index([role])
+  @@index([plan])
 }
+
 
 model Account {
   id   String @id @default(uuid())
@@ -646,4 +725,16 @@ enum PostExit {
   REV
   RNG
   SWP
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+
+enum UserPlan {
+  FREE
+  PRO
+  ELITE
 }

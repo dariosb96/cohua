@@ -8,12 +8,13 @@ import { signIn } from "next-auth/react"
 export default function RegisterForm() {
   const router = useRouter()
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phone: "",
-  })
+const [form, setForm] = useState({
+  name: "",
+  username: "",
+  email: "",
+  password: "",
+  phone: "",
+})
 
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -26,8 +27,8 @@ export default function RegisterForm() {
   }
 
   const validate = () => {
-    if (!form.name || !form.email || !form.password) {
-      return "Nombre, email y contraseña son obligatorios"
+    if (!form.name || !form.username || !form.email || !form.password) {
+      return "Nombre, username, email y contraseña son obligatorios"
     }
 
     if (form.password.length < 6) {
@@ -86,66 +87,165 @@ export default function RegisterForm() {
     }
   }
 
-  return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-xl shadow-md w-96 space-y-4"
-      >
-        <h1 className="text-xl font-bold text-black text-center">Crear cuenta</h1>
+return (
+  <div className="min-h-screen flex items-center justify-center bg-[#050505] px-4">
 
-        <input
-          name="name"
-          placeholder="Nombre"
-          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none text-gray-800"
-          onChange={handleChange}
-        />
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#12372a33,transparent_40%)]" />
 
-        <input
-          name="email"
-          type="email"
-          placeholder="Correo"
-          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none text-gray-800"
-          onChange={handleChange}
-        />
+    <form
+      onSubmit={handleSubmit}
+      className="
+        relative
+        w-full max-w-md
+        bg-zinc-900/80
+        backdrop-blur
+        border border-zinc-800
+        p-8
+        rounded-2xl
+        shadow-2xl
+        space-y-5
+      "
+    >
 
-        <input
-          name="password"
-          type="password"
-          placeholder="Contraseña"
-          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none text-gray-800"
-          onChange={handleChange}
-        />
+      <div className="text-center space-y-2">
 
-        <input
-          name="phone"
-          placeholder="Teléfono (opcional)"
-          className="w-full border p-2 rounded focus:ring-2 focus:ring-black outline-none text-gray-800"
-          onChange={handleChange}
-        />
+        <h1 className="
+          text-3xl 
+          font-bold 
+          text-white
+        ">
+          Cohua
+        </h1>
 
-        {error && (
-          <p className="text-red-500 text-sm text-center">{error}</p>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-black text-white p-2 rounded hover:bg-gray-800 transition"
-        >
-          {loading ? "Creando cuenta..." : "Registrarse"}
-        </button>
-
-        <p className="text-sm text-center text-gray-700">
-          ¿Notienes cuenta?{" "}
-          <span
-            className="text-blue-600 cursor-pointer"
-            onClick={() => router.push("/login")}
-          >
-            Inicia sesión
-          </span>
+        <p className="text-zinc-400 text-sm">
+          Crea tu cuenta
         </p>
-      </form>
-    </div>
-  )
+
+      </div>
+
+
+      <input
+        name="name"
+        placeholder="Nombre"
+        className="
+          w-full
+          bg-zinc-950
+          border border-zinc-800
+          text-white
+          placeholder:text-zinc-600
+          p-3
+          rounded-xl
+          outline-none
+          focus:border-emerald-500
+          transition
+        "
+        onChange={handleChange}
+      />
+      
+      <input
+        name="username"
+        placeholder="Nombre de usuario"
+        className="
+          w-full
+          bg-zinc-950
+          border border-zinc-800
+          text-white
+          placeholder:text-zinc-600
+          p-3
+          rounded-xl
+          outline-none
+          focus:border-emerald-500
+          transition
+        "
+        onChange={handleChange}
+      />
+
+
+      <input
+        name="email"
+        type="email"
+        placeholder="Correo"
+        className="
+          w-full bg-zinc-950
+          border border-zinc-800
+          text-white
+          placeholder:text-zinc-600
+          p-3 rounded-xl
+          outline-none
+          focus:border-emerald-500
+        "
+        onChange={handleChange}
+      />
+
+
+      <input
+        name="password"
+        type="password"
+        placeholder="Contraseña"
+        className="
+          w-full bg-zinc-950
+          border border-zinc-800
+          text-white
+          p-3 rounded-xl
+          outline-none
+          focus:border-emerald-500
+        "
+        onChange={handleChange}
+      />
+
+
+      <input
+        name="phone"
+        placeholder="Teléfono"
+        className="
+          w-full bg-zinc-950
+          border border-zinc-800
+          text-white
+          p-3 rounded-xl
+        "
+        onChange={handleChange}
+      />
+
+
+      {error && (
+        <p className="text-red-400 text-sm text-center">
+          {error}
+        </p>
+      )}
+
+
+      <button
+        disabled={loading}
+        className="
+          w-full
+          bg-emerald-500
+          hover:bg-emerald-400
+          text-black
+          font-semibold
+          py-3
+          rounded-xl
+          transition
+        "
+      >
+        {loading ? "Creando..." : "Crear cuenta"}
+      </button>
+
+
+      <p className="text-center text-zinc-500 text-sm">
+        ¿Ya tienes cuenta?{" "}
+        <span
+          onClick={() => router.push('/login')}
+          className="
+            text-emerald-400
+            cursor-pointer
+          "
+        >
+          Entrar
+        </span>
+      </p>
+
+    </form>
+
+  </div>
+)
 }
