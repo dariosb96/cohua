@@ -220,7 +220,7 @@ return (
           w-full
           bg-emerald-500
           hover:bg-emerald-400
-          text-black
+          text-zinc-800
           font-semibold
           py-3
           rounded-xl
@@ -231,7 +231,7 @@ return (
       </button>
 
 
-      <p className="text-center text-zinc-500 text-sm">
+      <p className="text-center text-zinc-300 text-sm">
         ¿Ya tienes cuenta?{" "}
         <span
           onClick={() => router.push('/login')}

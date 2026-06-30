@@ -1,36 +1,100 @@
 import { NextResponse } from "next/server"
-import prisma from "@/lib/prisma"
-import bcrypt from "bcryptjs"
-export async function POST(req: Request) {
-  try {
-    const { email, password, name } = await req.json()
+import { userService } from "@/services/userService"
 
-    const existing = await prisma.user.findUnique({
-      where: { email }
-    })
 
-    if (existing) {
-      return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 }
-      )
-    }
+export async function POST(req:Request){
 
-    const hashedPassword = await bcrypt.hash(password, 10)
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        password: hashedPassword
-      }
-    })
+try{
 
-    return NextResponse.json(user)
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Error creating user" },
-      { status: 500 }
-    )
-  }
+
+const body = await req.json()
+
+
+const {
+ name,
+ username,
+ email,
+ password,
+ phone
+}=body
+
+
+
+if(
+ !name ||
+ !username ||
+ !email ||
+ !password
+){
+
+return NextResponse.json(
+{
+error:"Faltan campos obligatorios"
+},
+{
+status:400
+}
+)
+
+}
+
+
+
+const user =
+await userService.create({
+
+name,
+
+username,
+
+email,
+
+password,
+
+phone
+
+})
+
+
+
+return NextResponse.json(
+user,
+{
+status:201
+}
+)
+
+
+
+}catch(error:any){
+
+
+if(error.message==="USER_EXISTS"){
+
+return NextResponse.json(
+{
+error:"Usuario o email ya registrado"
+},
+{
+status:409
+}
+)
+
+}
+
+
+
+return NextResponse.json(
+{
+error:"Error creando usuario"
+},
+{
+status:500
+}
+)
+
+
+}
+
 }

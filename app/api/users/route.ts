@@ -1,98 +1,38 @@
-// app/api/users/route.ts
-import { userService } from "@/services/userService"
 import { NextResponse } from "next/server"
+import prisma from "@/lib/prisma"
 
-export async function GET() {
-  try {
-    const users = await userService.getAll()
-    return NextResponse.json(users)
-  } catch (error) {
-    return NextResponse.json({ error: "Error al obtener usuarios" }, { status: 500 })
-  }
+
+export async function GET(){
+
+
+const users =
+await prisma.user.findMany({
+
+select:{
+
+id:true,
+
+name:true,
+
+username:true,
+
+email:true,
+
+role:true,
+
+plan:true,
+
+isActive:true,
+
+isBanned:true,
+
+createdAt:true
+
 }
 
-export async function POST(req: Request) {
-
-  try {
-
-    const body = await req.json()
-
-    const {
-      name,
-      username,
-      email,
-      password,
-      phone
-    } = body
+})
 
 
-    console.log("POST /api/users", body)
+return NextResponse.json(users)
 
-
-    if (
-      !name ||
-      !username ||
-      !email ||
-      !password
-    ) {
-
-      return NextResponse.json(
-        {
-          error: "Nombre, usuario, email y contraseña son obligatorios"
-        },
-        {
-          status:400
-        }
-      )
-    }
-
-
-    const user =
-      await userService.create({
-        name,
-        username,
-        email,
-        password,
-        phone
-      })
-
-
-    return NextResponse.json(
-      user,
-      {
-        status:201
-      }
-    )
-
-
-  } catch (error:any) {
-
-
-    console.error(error)
-
-
-    if(error.code === "P2002") {
-
-      return NextResponse.json(
-        {
-          error:"Email, usuario o teléfono ya registrado"
-        },
-        {
-          status:409
-        }
-      )
-
-    }
-
-
-    return NextResponse.json(
-      {
-        error:"Error al crear usuario"
-      },
-      {
-        status:500
-      }
-    )
-
-  }
 }

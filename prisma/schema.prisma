@@ -14,19 +14,17 @@ datasource db {
 model User {
   id String @id @default(uuid())
 
-
   // =========================
   // IDENTIDAD
   // =========================
 
-  name     String
-  username String @unique
-  email    String @unique
+  name          String
+  username      String    @unique
+  email         String    @unique
   emailVerified DateTime?
 
   phone    String? @unique
   password String
-
 
   // =========================
   // PERFIL
@@ -35,19 +33,19 @@ model User {
   avatar String?
   bio    String?
 
-
   // =========================
-  // PERMISOS / MEMBRESIA
+  // PERMISOS / PLAN
   // =========================
 
   role UserRole @default(USER)
+
   plan UserPlan @default(FREE)
 
   planExpiresAt DateTime?
 
   isActive Boolean @default(true)
-  isBanned Boolean @default(false)
 
+  isBanned Boolean @default(false)
 
   // =========================
   // SEGURIDAD
@@ -56,8 +54,8 @@ model User {
   lastLogin DateTime?
 
   failedLoginAttempts Int @default(0)
-  lockedUntil DateTime?
 
+  lockedUntil DateTime?
 
   // =========================
   // PREFERENCIAS
@@ -65,49 +63,43 @@ model User {
 
   timezone String @default("America/Mexico_City")
 
-  defaultTimeframe Timeframe?
-
-
   // =========================
-  // AUDITORIA
+  // FECHAS
   // =========================
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
+  updatedAt DateTime @updatedAt
 
   // =========================
   // RELACIONES
   // =========================
 
-  accounts   Account[]
-  setups     Setup[]
-  tags       Tag[]
+  accounts Account[]
+
+  setups Setup[]
+
+  tags Tag[]
+
   alertRules AlertRule[]
+
   tradePlans TradePlan[]
 
-
   // =========================
-  // ADMIN / CREACION DE USUARIOS
+  // ADMIN CREA USUARIOS
   // =========================
 
   createdUsers User[] @relation("UserCreator")
 
   createdById String?
 
-  createdBy User? @relation(
-    "UserCreator",
-    fields: [createdById],
-    references: [id]
-  )
-
+  createdBy User? @relation("UserCreator", fields: [createdById], references: [id])
 
   @@index([email])
   @@index([username])
   @@index([role])
   @@index([plan])
 }
-
 
 model Account {
   id   String @id @default(uuid())
@@ -729,12 +721,14 @@ enum PostExit {
 
 enum UserRole {
   USER
+
   ADMIN
 }
 
-
 enum UserPlan {
   FREE
+
   PRO
+
   ELITE
 }
