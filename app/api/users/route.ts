@@ -1,38 +1,235 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
+import { userService } from "@/services/userService"
+import { registerSchema } from "@/lib/validations/user"
+import { requireRole } from "@/lib/validations/permissions"
 
 
-export async function GET(){
+
+export async function POST(req: Request) {
 
 
-const users =
-await prisma.user.findMany({
+  try {
 
-select:{
 
-id:true,
+    const body = await req.json()
 
-name:true,
 
-username:true,
+    const validation =
+      registerSchema.safeParse(body)
 
-email:true,
 
-role:true,
 
-plan:true,
+    if (!validation.success) {
 
-isActive:true,
 
-isBanned:true,
+      return NextResponse.json(
+        {
+          error: "Datos inválidos",
+          details:
+            validation.error.flatten()
+        },
+        {
+          status: 400
+        }
+      )
 
-createdAt:true
+    }
+
+
+
+    const data = validation.data
+
+
+
+    const user =
+      await userService.create({
+
+        name: data.name,
+
+        username:
+          data.username.toLowerCase(),
+
+        email:
+          data.email.toLowerCase(),
+
+        password:data.password,
+
+        phone:data.phone
+
+      })
+
+
+
+    return NextResponse.json(
+      user,
+      {
+        status:201
+      }
+    )
+
+
+
+  } catch(error:any) {
+
+
+    console.error(error)
+
+
+
+    if(
+      error.message === "USER_EXISTS"
+    ){
+
+
+      return NextResponse.json(
+        {
+          error:
+          "Usuario o email ya registrado"
+        },
+        {
+          status:409
+        }
+      )
+
+    }
+
+
+
+    return NextResponse.json(
+      {
+        error:
+        "Error creando usuario"
+      },
+      {
+        status:500
+      }
+    )
+
+  }
 
 }
 
-})
 
 
-return NextResponse.json(users)
+
+
+
+
+export async function GET() {
+
+
+  try {
+
+
+    await requireRole([
+      "ADMIN",
+      "SUPERADMIN"
+    ])
+
+
+
+
+    const users =
+      await prisma.user.findMany({
+
+        select:{
+
+
+          id:true,
+
+          name:true,
+
+          username:true,
+
+          email:true,
+
+          phone:true,
+
+
+          role:true,
+
+          plan:true,
+
+
+          isActive:true,
+
+          isBanned:true,
+
+
+          createdAt:true,
+
+          updatedAt:true
+
+
+        },
+
+
+        orderBy:{
+          createdAt:"desc"
+        }
+
+      })
+
+
+
+
+    return NextResponse.json(
+      users
+    )
+
+
+
+
+  } catch(error:any) {
+
+
+
+    if(
+      error.message === "UNAUTHORIZED"
+    ){
+
+      return NextResponse.json(
+        {
+          error:"No autorizado"
+        },
+        {
+          status:401
+        }
+      )
+
+    }
+
+
+
+
+    if(
+      error.message === "FORBIDDEN"
+    ){
+
+      return NextResponse.json(
+        {
+          error:"Sin permisos"
+        },
+        {
+          status:403
+        }
+      )
+
+    }
+
+
+
+
+    return NextResponse.json(
+      {
+        error:"Error obteniendo usuarios"
+      },
+      {
+        status:500
+      }
+    )
+
+  }
 
 }

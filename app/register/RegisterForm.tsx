@@ -35,6 +35,10 @@ const [form, setForm] = useState({
       return "La contraseña debe tener al menos 6 caracteres"
     }
 
+    if (form.name.length < 2) {
+      return "El nombre debe tener al menos 2 caracteres"
+    }
+
     return ""
   }
 
