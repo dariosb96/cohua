@@ -142,10 +142,6 @@ export default function Topbar() {
               <p className="text-sm font-medium">
                 Trader
               </p>
-
-              <p className="text-xs text-zinc-500">
-                Premium
-              </p>
             </div>
           </button>
         </div>
