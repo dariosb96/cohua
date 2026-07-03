@@ -1,365 +1,141 @@
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/authOptions"
 
+import { profileSelect } from "@/lib/prisma/user.select"
 
-type CreateUserDTO = {
-  name: string
-  username: string
-  email: string
-  password: string
-  phone?: string
-}
+import { toProfileUser } from "@/mappers/user.mapper"
 
-
-type UpdateUserDTO = {
-  name?: string
-  email?: string
-  phone?: string
-  password?: string
-  avatar?: string
-  bio?: string
-}
-
-
+import type {
+  CreateUserDTO,
+  UpdateUserDTO,
+  ProfileUser,
+} from "@/types/user"
 
 export const userService = {
-
-
-  async create(data: CreateUserDTO) {
-
-
-    const exists =
-      await prisma.user.findFirst({
-        where: {
-          OR: [
-            { email: data.email },
-            { username: data.username }
-          ]
-        }
-      })
-
+  async create(
+    data: CreateUserDTO
+  ): Promise<ProfileUser> {
+    const exists = await prisma.user.findFirst({
+      where: {
+        OR: [
+          {
+            email: data.email,
+          },
+          {
+            username: data.username,
+          },
+        ],
+      },
+    })
 
     if (exists) {
       throw new Error("USER_EXISTS")
     }
 
+    const password = await bcrypt.hash(
+      data.password,
+      10
+    )
 
-
-    const hashedPassword =
-      await bcrypt.hash(data.password, 10)
-
-
-
-    return prisma.user.create({
-
+    const user = await prisma.user.create({
       data: {
-
         name: data.name,
-
         username: data.username,
-
         email: data.email,
-
         phone: data.phone,
-
-        password: hashedPassword,
-
+        password,
         role: "USER",
-
-        plan: "FREE"
-
+        plan: "FREE",
       },
-
-
-      select: {
-
-        id: true,
-
-        name: true,
-
-        username: true,
-
-        email: true,
-
-        phone: true,
-
-        role: true,
-
-        plan: true,
-
-        createdAt: true
-
-      }
-
+      select: profileSelect,
     })
 
+    return toProfileUser(user)
   },
 
-
-
-
-
-  async getMe() {
-
-
-    const session =
-      await getServerSession(authOptions)
-
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized")
-    }
-
-
-
-    return prisma.user.findUnique({
-
+  async getMe(
+    userId: string
+  ): Promise<ProfileUser> {
+    const user = await prisma.user.findUnique({
       where: {
-        id: session.user.id
+        id: userId,
       },
-
-
-      select: {
-
-        id: true,
-
-        name: true,
-
-        username: true,
-
-        email: true,
-
-        avatar: true,
-
-        bio: true,
-
-        role: true,
-
-        plan: true,
-
-        createdAt: true,
-
-
-        accounts: {
-
-          select: {
-
-            id: true,
-
-            name: true,
-
-            balance: true,
-
-            createdAt: true
-
-          }
-
-        }
-
-      }
-
+      select: profileSelect,
     })
 
+    if (!user) {
+      throw new Error("USER_NOT_FOUND")
+    }
+
+    return toProfileUser(user)
   },
 
-
-
-
-
-  async getById(id:string) {
-
-
-    const session =
-      await getServerSession(authOptions)
-
-
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized")
-    }
-
-
-
-    if (
-      session.user.id !== id &&
-      session.user.role !== "ADMIN"
-    ) {
-
-      throw new Error("Forbidden")
-
-    }
-
-
-
-    return prisma.user.findUnique({
-
-      where:{
-        id
+  async getById(
+    userId: string
+  ): Promise<ProfileUser> {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
       },
-
-
-      select:{
-
-        id:true,
-
-        name:true,
-
-        username:true,
-
-        email:true,
-
-        phone:true,
-
-        avatar:true,
-
-        bio:true,
-
-        role:true,
-
-        plan:true,
-
-        isActive:true,
-
-        isBanned:true,
-
-        createdAt:true,
-
-        updatedAt:true
-
-      }
-
+      select: profileSelect,
     })
 
+    if (!user) {
+      throw new Error("USER_NOT_FOUND")
+    }
+
+    return toProfileUser(user)
   },
-
-
-
-
 
   async update(
-    id:string,
-    data:UpdateUserDTO
-  ){
+    userId: string,
+    data: UpdateUserDTO
+  ): Promise<ProfileUser> {
+    const updateData: Record<string, unknown> = {}
 
-
-    const session =
-      await getServerSession(authOptions)
-
-
-
-    if(!session?.user?.id){
-      throw new Error("Unauthorized")
+    if (data.name !== undefined) {
+      updateData.name = data.name
     }
 
-
-
-    if(session.user.id !== id){
-      throw new Error("Forbidden")
+    if (data.email !== undefined) {
+      updateData.email = data.email
     }
 
-
-
-    const updateData:any = {}
-
-
-
-    if(data.name)
-      updateData.name=data.name
-
-
-    if(data.email)
-      updateData.email=data.email
-
-
-    if(data.phone)
-      updateData.phone=data.phone
-
-
-    if(data.avatar)
-      updateData.avatar=data.avatar
-
-
-    if(data.bio)
-      updateData.bio=data.bio
-
-
-
-    if(data.password){
-
-      updateData.password =
-        await bcrypt.hash(
-          data.password,
-          10
-        )
-
+    if (data.phone !== undefined) {
+      updateData.phone = data.phone
     }
 
+    if (data.avatar !== undefined) {
+      updateData.avatar = data.avatar
+    }
 
+    if (data.bio !== undefined) {
+      updateData.bio = data.bio
+    }
 
-    return prisma.user.update({
+    if (data.password) {
+      updateData.password = await bcrypt.hash(
+        data.password,
+        10
+      )
+    }
 
-      where:{
-        id
+    const user = await prisma.user.update({
+      where: {
+        id: userId,
       },
-
-
-      data:updateData,
-
-
-      select:{
-
-        id:true,
-
-        name:true,
-
-        username:true,
-
-        email:true,
-
-        phone:true,
-
-        updatedAt:true
-
-      }
-
+      data: updateData,
+      select: profileSelect,
     })
 
+    return toProfileUser(user)
   },
 
-
-
-
-
-  async delete(id:string) {
-
-
-    const session =
-      await getServerSession(authOptions)
-
-
-
-    if(!session?.user?.id){
-      throw new Error("Unauthorized")
-    }
-
-
-
-    if(session.user.id !== id){
-      throw new Error("Forbidden")
-    }
-
-
-
-    return prisma.user.delete({
-
-      where:{
-        id
-      }
-
+  async delete(userId: string) {
+    await prisma.user.delete({
+      where: {
+        id: userId,
+      },
     })
-
-  }
-
+  },
 }

@@ -1,30 +1,29 @@
-import { userService } from "@/services/userService"
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
+
 import { authOptions } from "@/lib/authOptions"
-import ProfileClient from "./ProfileClient"
+import { userService } from "@/services/userService"
 
+import ProfileClient from "@/components/profile/ProfileClient"
 
-export default async function ProfilePage(){
+export default async function ProfilePage() {
 
+  const session =
+    await getServerSession(authOptions)
 
-const session =
- await getServerSession(authOptions)
+  if (!session?.user?.id) {
+    redirect("/login")
+  }
 
+  const user =
+    await userService.getMe(
+      session.user.id
+    )
 
-if(!session){
- redirect("/login")
-}
-
-
-
-const user =
- await userService.getMe()
-
-
-
-return (
- <ProfileClient user={user}/>
-)
+  return (
+    <ProfileClient
+      user={user}
+    />
+  )
 
 }

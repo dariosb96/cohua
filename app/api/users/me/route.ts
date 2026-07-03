@@ -1,41 +1,44 @@
 import { NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+
+import { authOptions } from "@/lib/authOptions"
 import { userService } from "@/services/userService"
 
+export async function GET() {
 
-export async function GET(){
+  try {
 
-  try{
+    const session =
+      await getServerSession(authOptions)
 
-    const user =
-      await userService.getMe()
-
-
-    return NextResponse.json(user)
-
-
-  }catch(error:any){
-
-
-    if(error.message === "Unauthorized"){
+    if (!session?.user?.id) {
 
       return NextResponse.json(
         {
-          error:"No autorizado"
+          error: "No autorizado"
         },
         {
-          status:401
+          status: 401
         }
       )
 
     }
 
+    const user =
+      await userService.getMe(
+        session.user.id
+      )
+
+    return NextResponse.json(user)
+
+  } catch (error) {
 
     return NextResponse.json(
       {
-        error:"Error obteniendo perfil"
+        error: "Error obteniendo perfil"
       },
       {
-        status:500
+        status: 500
       }
     )
 
