@@ -1,6 +1,6 @@
 "use client"
 
-import type { ProfileUser } from "@/types/user"
+import type { ProfileUser } from "@/src/domain/types/user"
 
 interface Props {
   user: ProfileUser

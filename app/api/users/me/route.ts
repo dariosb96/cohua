@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 
-import { authOptions } from "@/lib/authOptions"
-import { userService } from "@/services/userService"
+import { authOptions } from "@/src/shared/auth/authOptions"
+import { userService } from "@/src/application/services/userService"
 
 export async function GET() {
 

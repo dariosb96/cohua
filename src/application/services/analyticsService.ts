@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma"
+import prisma from "@/src/infrastructure/database/prisma"
 
 type TradeWithSetup = Awaited<
  ReturnType<typeof prisma.trade.findMany>

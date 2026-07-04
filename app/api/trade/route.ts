@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server"
 import {
   createTrade,
   getTrades
-} from "@/services/tradeService"
+} from "@/src/modules/trades/services/tradeService"
 
 export async function GET() {
   try {

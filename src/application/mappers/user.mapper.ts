@@ -1,8 +1,8 @@
 import { Prisma } from "@prisma/client"
-import { ProfileUser } from "@/types/user"
+import { ProfileUser } from "@/src/domain/types/user"
 
 type PrismaProfile = Prisma.UserGetPayload<{
-  select: typeof import("@/lib/prisma/user.select").profileSelect
+  select: typeof import("@/src/infrastructure/database/prisma/selects/user.select").profileSelect
 }>
 
 export function toProfileUser(

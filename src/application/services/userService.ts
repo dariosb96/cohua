@@ -1,15 +1,15 @@
-import prisma from "@/lib/prisma"
+import prisma from "@/src/infrastructure/database/prisma"
 import bcrypt from "bcryptjs"
 
-import { profileSelect } from "@/lib/prisma/user.select"
+import { profileSelect } from "@/src/infrastructure/database/prisma/selects/user.select"
 
-import { toProfileUser } from "@/mappers/user.mapper"
+import { toProfileUser } from "@/src/application/mappers/user.mapper"
 
 import type {
   CreateUserDTO,
   UpdateUserDTO,
   ProfileUser,
-} from "@/types/user"
+} from "@/src/domain/types/user"
 
 export const userService = {
   async create(

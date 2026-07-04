@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 
 import Sidebar from "@/components/layout/sideBard"
 import Topbar from "@/components/layout/TopBar"
-import Providers from "@/lib/providers"
+import Providers from "@/src/lib/providers"
 
 export default function DashboardLayout({
   children,

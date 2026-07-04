@@ -1,4 +1,4 @@
-import { userService } from "@/services/userService"
+import { userService } from "@/src/application/services/userService"
 import { NextResponse } from "next/server"
 
 

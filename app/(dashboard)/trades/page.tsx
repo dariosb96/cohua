@@ -1,6 +1,6 @@
 // app/trades/page.tsx
 
-import { getTrades } from "@/services/tradeService"
+import { getTrades } from "@/src/modules/trades/services/tradeService"
 
 export default async function TradesPage() {
 

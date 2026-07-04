@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 
-import { authOptions } from "@/lib/authOptions"
-import { userService } from "@/services/userService"
+import { authOptions } from "@/src/shared/auth/authOptions"
+import { userService } from "@/src/application/services/userService"
 
 import ProfileClient from "@/components/profile/ProfileClient"
 

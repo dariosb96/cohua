@@ -6,7 +6,7 @@ import {
   getTrade,
   updateTrade,
   deleteTrade
-} from "@/services/tradeService"
+} from "@/src/modules/trades/services/tradeService"
 
 interface Params {
   params: Promise<{

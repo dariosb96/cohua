@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
-import prisma from "@/lib/prisma"
-import { userService } from "@/services/userService"
-import { registerSchema } from "@/lib/validations/user"
-import { requireRole } from "@/lib/validations/permissions"
+import prisma from "@/src/infrastructure/database/prisma"
+import { userService } from "@/src/application/services/userService"
+import { registerSchema } from "@/src/application/validations/user"
+import { requireRole } from "@/src/application/validations/permissions"
 
 
 

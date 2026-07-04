@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth"
-import { authOptions } from "../../lib/authOptions"
+import { authOptions } from "../../shared/auth/authOptions"
 
 
 export async function requireRole(

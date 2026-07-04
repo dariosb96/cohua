@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma"
+import prisma from "@/src/infrastructure/database/prisma"
 import { NextResponse } from "next/server"
 
 type Trade = Awaited<

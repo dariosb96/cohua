@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma"
+import prisma from "@/src/infrastructure/database/prisma"
 import { Decimal } from "@prisma/client/runtime/library"
 
 type CreateAccountInput = {

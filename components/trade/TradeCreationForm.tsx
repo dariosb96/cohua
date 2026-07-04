@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {
   tradeSchema,
   TradeFormData
-} from "@/lib/validations/tradeSchema"
+} from "@/src/application/validations/tradeSchema"
 
 interface Account {
   id: string
