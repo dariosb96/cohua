@@ -28,3 +28,14 @@ export const journalSelect = {
 
 
 ///listo!!
+
+//checar por fdavor
+
+
+////
+
+
+/////
+///
+
+///// checar
